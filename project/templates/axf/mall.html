@@ -1,0 +1,98 @@
+{% extends 'axf/base.html'%}
+{% load static from staticfiles%}
+
+{% block linkscript %}
+<!--用于当css和js需要单独定义时使用-->
+<link rel="stylesheet" type="text/css" href="{% static 'mall/css/mall.css'%}" />
+<script type="text/javascript" charset="utf-8" src="{% static 'mall/js/mall.js' %}"></script>
+{% endblock linkscript %}
+
+{% block base%}
+<div id="mall">
+    <aside>
+        <!-- 闪购商城左侧导航栏 -->
+        <menu>
+            <ul>
+                {% for item in leftBar %}
+                <li>
+                    <span class="yellowSlide"></span>
+<!--                    传到指定id的页面，typeid导向对应分类的商品页 -->
+<!--                    <a href="/mall/{{item.typeid}}/0">{{item.typename}}</a>-->
+                    <a href="{% url 'axf:mall' item.typeid 0 0 %}">{{item.typename}}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </menu>
+    </aside>
+
+
+    <!--   字体，直接引用即可 -->
+    <section>
+        <nav>
+            <ul>
+                <li><span id="alltypebtn">全部类型<span class="glyphicon glyphicon-chevron-down" style="font-weight: 100"></span></span></li>
+                <li><span id="showsortbtn">综合排序<span class="glyphicon glyphicon-chevron-down" style="font-weight: 100"></span></span></li>
+            </ul>
+        </nav>
+
+
+        <!--        商品展示菜单  -->
+        <menu>
+            <ul>
+                {% for item in productList %}
+                <li>
+                    <a href="#">
+                        <img src="{{item.productimg}}" />
+                        <article class="shoppingInfo">
+                            <h6>{{item.productlongname}}</h6>
+<!--                            精选标签，可根据实际情况修改-->
+                            <p class="detailTag"><span>精选</span><span>{{item.pedesc}}</span></p>
+<!--                            规格-->
+                            <span class="unit">{{item.specifics}}</span>
+<!--                            价格-->
+                            <p class="price"><span>￥{{item.price}}</span><s><span>￥{{item.marketprice}}</span></s></p>
+                        </article>
+                    </a>
+<!--                    商品加一/减一-->
+                    <section>
+                        {% if item.num > 0 %}
+                            <button ga="{{item.productid}}" class="subShopping">-</button>
+                        {% endif %}
+                        <span id="{{item.productid}}">{{item.num|default:0}}</span>
+                        <button ga="{{item.productid}}" class="addShopping">+</button>
+                    </section>
+                </li>
+                {% endfor %}
+            </ul>
+            <div id="typediv">
+                <div>
+                    {% for item in childList %}
+            <!--              categoryid用于产品分类，         -->
+<!--                        <a href="/market/{{categoryid}}/{{item.childId}}/0/"><span>{{item.childName}}</span></a>-->
+                        <a href="{% url 'axf:mall' categoryid item.childId 0 %}"><span>{{item.childName}}</span></a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="sortdiv">
+                <div>
+<!--                    <a href="/market/{{categoryid}}/{{cid}}/0/" class="sorta"><span>综合排序</span></a>-->
+<!--                    <a href="/market/{{categoryid}}/{{cid}}/1/" class="sorta"><span>销量排序</span></a>-->
+<!--                    <a href="/market/{{categoryid}}/{{cid}}/2/" class="sorta"><span>价格最低</span></a>-->
+<!--                    <a href="/market/{{categoryid}}/{{cid}}/3/" class="sorta"><span>价格最高</span></a>-->
+                    <a href=" {% url 'axf:mall' categoryid cid 0 %}" class="sorta"><span>综合排序</span></a>
+                    <a href=" {% url 'axf:mall' categoryid cid 1 %}" class="sorta"><span>销量排序</span></a>
+                    <a href=" {% url 'axf:mall' categoryid cid 2 %}" class="sorta"><span>价格最低</span></a>
+                    <a href=" {% url 'axf:mall' categoryid cid 3 %}" class="sorta"><span>价格最高</span></a>
+
+                </div>
+            </div>
+        </menu>
+
+
+
+    </section>
+
+
+</div>
+{% endblock base%}

@@ -1,0 +1,12 @@
+{% extends 'axf/base.html'%}
+{% load static from staticfiles%}
+
+{% block linkscript %}
+<!--用于当css和js需要单独定义时使用-->
+<link rel="stylesheet" type="text/css" href="{% static 'trolley/css/trolley.css'%}" />
+<script type="text/javascript" charset="utf-8" src="{% static 'trolley/js/trolley.js' %}"></script>
+{% endblock linkscript %}
+
+{% block base%}
+    这里编写购物车页面
+{% endblock base%}

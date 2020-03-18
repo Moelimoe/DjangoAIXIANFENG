@@ -1,0 +1,101 @@
+html, body{
+    /* 适应手机屏幕 */
+    width:100%;
+    height:100%;
+}
+
+body{
+    margin:0;
+    padding:0;
+    /* 水平方向溢出则隐藏 */
+    overflow-x:hidden;
+    /* 垂直方向设置滚动 */
+    overflow-y:auto;
+    background:#eee;
+}
+ /*  */
+header, footer{
+    width: 100%;
+    /* rem根据屏幕适配 */
+    height: 1.5rem;
+    font-size:0.277777rem;
+    border-top:1px solid #f0f0f0;
+    z-index:10;
+    position:fixed;
+     /* 在容器内弹性排列 */
+    display: flex;
+}
+/*  header在最上面(靠左) */
+header{
+   /* background:yellow;*/
+    top:0;
+    left:0;
+}
+/*  footer在最上面(靠左) */
+footer{
+    background:#fff;
+    bottom:0;
+    left:0;
+}
+
+footer a{
+    display:block;
+    width:25%!important;
+    text-align:center;
+    overflow:hidden!important;
+}
+
+footer dl dt{
+    height:0.777777rem;
+    padding-top:0.22222rem;
+    position:relative;
+}
+
+
+footer dl dt span{
+    display:inline-block;
+    width:0.513889rem;
+    height:0.513889rem;
+}
+
+footer dl dd{
+    width: 100%;
+    height: 0.708333rem;
+}
+
+
+footer .home span{
+    background: url(/static/main/img/home.png) no-repeat;
+    background-size:0.513889rem;
+}
+footer .mall span{
+    background:url(/static/main/img/mall.png) no-repeat;
+    background-size:0.513889rem;
+}
+footer .trolley span{
+    background:url(/static/main/img/trolley.png) no-repeat;
+    background-size:0.513889rem;
+}
+footer .profile span{
+    background:url(/static/main/img/profile.png) no-repeat;
+    background-size:0.513889rem;
+}
+
+ /* 设置a的下划线、点等样式 */
+a{
+    text-decoration:none
+}
+a:link{
+    text-decoration:none
+}
+a:visited{
+    text-decoration:none
+}
+a:hover{
+    text-decoration:none
+}
+a:active{
+    text-decoration:none
+}
+
+
