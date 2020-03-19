@@ -10,4 +10,8 @@ urlpatterns = [
     re_path(r'^mall/$', views.mall_redirect, name='mall_redirect'),
     re_path(r'^trolley/$', views.trolley, name='trolley'),
     re_path(r'^profile/$', views.profile, name='profile'),
+    # 登录、注册
+    re_path(r'^login/$', views.login, name='login'),
+    re_path(r'^register/$', views.register, name='register'),
+
 ]

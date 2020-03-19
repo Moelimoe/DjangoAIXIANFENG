@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
-from .models import Wheel, Navigator, MustBuy, Commodity, GoodsOnSale, GoodsTypes, Goods
+from .models import Wheel, Navigator, MustBuy, Commodity, GoodsOnSale, GoodsTypes, Goods, User
 
 # Create your views here
 
@@ -31,6 +31,43 @@ def home(request):
 # 个人资料
 def profile(request):
     return render(request, 'axf/profile.html', {"title": "我的"})
+
+
+# 登录
+from .forms.login import LoginForm
+def login(request):
+    # 此种表单写法不能使用ajax实现
+    if request.method == 'POST':
+        f = LoginForm(request.POST)
+        if f.is_valid():
+        #     changed_data为用户提交的内容
+            user = f.cleaned_data["username"]
+            password = f.cleaned_data["password"]
+            # print(user, password)
+            # return HttpResponse("登录测试")
+            return render(request, 'axf/login.html', {"username": user, "password": password})
+        else:
+            return render(request, 'axf/login.html', {"title": "登录", "form": f, "error": f.errors})
+    # 点击未登录，加载登录表单
+    else:
+        f = LoginForm()
+        return render(request, 'axf/login.html', {"title": "登录", "form": f})
+
+
+# 注册
+def register(request):
+    return render(request, 'axf/register.html', {"title": "注册"})
+
+
+# 检测注册账户是否已存在
+def checkuserid(request):
+    userid = request.POST.get("userid")
+    try:
+        user = User.objects.get(userAccount=userid)
+        # 返回的第一个参数被register.js中函数的data接收，第二个参数为status
+        return JsonResponse({"data": "该用户名已被注册", "status": "error"})
+    except User.DoesNotExist as e:
+        return JsonResponse({"data": "注册成功", "status": "success"})
 
 
 # 商城

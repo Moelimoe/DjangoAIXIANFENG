@@ -128,23 +128,23 @@ class User(models.Model):
     # 用户账号，要唯一
     userAccount = models.CharField(max_length=20, unique=True)
     # 密码
-    userPasswd = models.CharField(max_length=20)
+    userPassword = models.CharField(max_length=20)
     # 昵称
     userName = models.CharField(max_length=20)
     # 手机号
     userPhone = models.CharField(max_length=20)
     # 地址
-    userAdderss = models.CharField(max_length=100)
+    userAddress = models.CharField(max_length=100)
     # 头像路径
     userImg = models.CharField(max_length=150)
     # 等级
     userRank = models.IntegerField()
-    # touken验证值，每次登陆之后都会更新
+    # token验证值，每次登陆之后都会更新
     userToken = models.CharField(max_length=50)
 
     @classmethod
-    def createuser(cls, account, passwd, name, phone, address, img, rank, token):
-        u = cls(userAccount=account, userPasswd=passwd, userName=name, userPhone=phone, userAdderss=address,
+    def createuser(cls, account, password, name, phone, address, img, rank, token):
+        u = cls(userAccount=account, userPassword=password, userName=name, userPhone=phone, userAddress=address,
                 userImg=img, userRank=rank, userToken=token)
         return u
 
