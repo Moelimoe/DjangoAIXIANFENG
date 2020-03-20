@@ -1,5 +1,5 @@
 from django.db import models
-
+import datetime
 
 # Create your models here.
 
@@ -63,22 +63,22 @@ class GoodsOnSale(models.Model):
     childcid1 = models.CharField(max_length=10)
     productid1 = models.CharField(max_length=10)
     longname1 = models.CharField(max_length=50)
-    price1 = models.CharField(max_length=10)
-    marketprice1 = models.CharField(max_length=10)
+    price1 = models.DecimalField(max_digits=12, decimal_places=2)
+    marketprice1 = models.DecimalField(max_digits=12, decimal_places=2)
 
     img2 = models.CharField(max_length=100)
     childcid2 = models.CharField(max_length=10)
     productid2 = models.CharField(max_length=10)
     longname2 = models.CharField(max_length=50)
-    price2 = models.CharField(max_length=10)
-    marketprice2 = models.CharField(max_length=10)
+    price2 = models.DecimalField(max_digits=12, decimal_places=2)
+    marketprice2 = models.DecimalField(max_digits=12, decimal_places=2)
 
     img3 = models.CharField(max_length=100)
     childcid3 = models.CharField(max_length=10)
     productid3 = models.CharField(max_length=10)
     longname3 = models.CharField(max_length=50)
-    price3 = models.CharField(max_length=10)
-    marketprice3 = models.CharField(max_length=10)
+    price3 = models.DecimalField(max_digits=12, decimal_places=2)
+    marketprice3 = models.DecimalField(max_digits=12, decimal_places=2)
 
 
 # 分类模型
@@ -106,9 +106,9 @@ class Goods(models.Model):
     # 规格
     specifics = models.CharField(max_length=20)
     # 价格
-    price = models.FloatField(max_length=10)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
     # 超市价格
-    marketprice = models.FloatField(max_length=10)
+    marketprice = models.DecimalField(max_digits=12, decimal_places=2)
     # 组id
     categoryid = models.CharField(max_length=10)
     # 子类组id
@@ -138,14 +138,16 @@ class User(models.Model):
     # 头像路径
     userImg = models.CharField(max_length=150)
     # 等级
-    userRank = models.IntegerField()
+    userLevel = models.IntegerField()
     # token验证值，每次登陆之后都会更新
     userToken = models.CharField(max_length=50)
+    registerTime = models.DateTimeField(null=True)
 
     @classmethod
-    def createuser(cls, account, password, name, phone, address, img, rank, token):
+    def createuser(cls, account, password, name, phone, address, img, level, token):
+        regisTime = datetime.datetime.now().replace(microsecond=0)
         u = cls(userAccount=account, userPassword=password, userName=name, userPhone=phone, userAddress=address,
-                userImg=img, userRank=rank, userToken=token)
+                userImg=img, userLevel=level, userToken=token, registerTime=regisTime)
         return u
 
 
@@ -162,8 +164,8 @@ class TrolleyManager2(models.Manager):
 class Trolley(models.Model):
     userAccount = models.CharField(max_length=20)
     productid = models.CharField(max_length=10)
-    productnum = models.IntegerField()
-    productprice = models.CharField(max_length=10)
+    productnum = models.IntegerField(default=0)
+    productprice = models.DecimalField(max_digits=12, decimal_places=2)
     isChose = models.BooleanField(default=True)
     productimg = models.CharField(max_length=150)
     productname = models.CharField(max_length=100)

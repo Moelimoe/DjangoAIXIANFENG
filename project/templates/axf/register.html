@@ -3,12 +3,13 @@
 
 
 
+{% block base %}
 <div id="register">
     <div id="header">
-        <a href="/profile/"><p>&lt;返回</p></a>
+        <a href="/profile/"><p>&lt;返回我的</p></a>
     </div>
     <form class="form-horizontal" action="/register/" method="post" enctype="multipart/form-data">
-        {%csrf_token%}
+        {% csrf_token %}
         <div class="input-group">
             <span class="input-group-addon">账号</span>
             <input id="account" type="text" class="form-control" placeholder="账号长度为6到12个字符" aria-describedby="basic-addon1" name="userAccount">
@@ -18,13 +19,15 @@
         <br/>
         <div class="input-group">
             <span class="input-group-addon">密码</span>
+<!--            第一次输入密码，id为pass，name为userPass-->
             <input id="pass" type="password" class="form-control" placeholder="密码长度为6~16个字符" aria-describedby="basic-addon1" name="userPass">
         </div>
         <span id="passerr" class="error">密码格式输入错误</span>
         <br />
         <div class="input-group">
-            <span class="input-group-addon">验证</span>
-            <input id="password" type="password" class="form-control" placeholder="密码长度为6~16个字符" aria-describedby="basic-addon1" name="userpassword">
+<!--            再次输入密码验证，id为password,name为userPassword-->
+            <span class="input-group-addon">确认密码</span>
+            <input id="password" type="password" class="form-control" placeholder="密码长度为6~16个字符" aria-describedby="basic-addon1" name="userPassword">
         </div>
         <span id="passworderr" class="error">两次密码输入不同</span>
         <br/>
@@ -40,10 +43,11 @@
         <br/>
         <div class="input-group">
             <span class="input-group-addon">地址</span>
-            <input required="required" type="text" class="form-control" aria-describedby="basic-addon1" name="userAdderss">
+            <input required="required" type="text" class="form-control" aria-describedby="basic-addon1" name="userAddress">
         </div>
         <br/>
         <div class="input-group">
+<!--            这里上传图片用的enctype="multipart/form-data"在开始from标签就注明了-->
             <span class="input-group-addon">头像</span>
             <input required="required" type="file" class="form-control" aria-describedby="basic-addon1" name="userImg">
         </div>
@@ -54,6 +58,7 @@
         </div>
     </form>
 </div>
+{% endblock base %}
 
 {% block linkscript %}
 <!--用于当css和js需要单独定义时使用-->

@@ -11,9 +11,9 @@
 <div id="profile">
     <section class="fixed">
         <span class="glyphicon glyphicon-user"></span>
-        <p><a href="/login/">未登录</a></p>
-        <p><span class="glyphicon glyphicon-fire"></span><span>等级</span></p>
-        <a id="regis" href="/register/">注册</a>
+        <p><a href="/login/">{{ userName|default:"未登录"}}</a></p>
+        <p><span class="glyphicon glyphicon-fire"></span><span>{{ userLevel|default:0 }}</span></p>
+        <a id="register" href="/register/">注册</a>
         <p><span class="glyphicon glyphicon-heart"></span>商品收藏</p>
     </section>
 
@@ -103,7 +103,7 @@
                 </li>
             </ul>
         </menu>
-        <p><a href="#">退出当前账号</a></p>
+        <p><a href="/signout/">退出当前账号</a></p>
     </section>
 </div>
 {% endblock base%}

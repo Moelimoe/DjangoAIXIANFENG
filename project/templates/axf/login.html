@@ -8,7 +8,7 @@
 
 {% block base %}
 <div id="login">
-    <a href="/profile/"><p>&lt;返回</p></a>
+    <a href="/profile/"><p>&lt;返回我的</p></a>
     <div id="box">
         <form action="/login/" method="post">
             {% csrf_token %}
@@ -26,9 +26,9 @@
                 <span>{{error.password.0}}</span>
                 {% endif %}
             </div>
-            console.log(username, password);
             <div>
                 <input type="submit" value="登陆"/>
+                <a href="/register/">没有账号？点我注册</a>
             </div>
         </form>
 

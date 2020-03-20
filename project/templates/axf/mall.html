@@ -17,7 +17,7 @@
                 <li>
                     <span class="yellowSlide"></span>
 <!--                    传到指定id的页面，typeid导向对应分类的商品页 -->
-<!--                    <a href="/mall/{{item.typeid}}/0">{{item.typename}}</a>-->
+                    {# <a href="/mall/{{item.typeid}}/0">{{item.typename}}</a> #}
                     <a href="{% url 'axf:mall' item.typeid 0 0 %}">{{item.typename}}</a>
                 </li>
                 {% endfor %}
@@ -55,10 +55,15 @@
                     </a>
 <!--                    商品加一/减一-->
                     <section>
-                        {% if item.num > 0 %}
+<!--                        商品大于0才显示减号-->
+                        {# {% if item.num > 0 %} #}
                             <button ga="{{item.productid}}" class="subShopping">-</button>
+                        {#   {% endif %} #}
+                        {% if item.productid in item_info_Trolley.keys %}
+                            <span id="{{item.productid}}">{{ item_info_Trolley|get_item:item.productid }}</span>
+                        {% else %}
+                            <span id="{{item.productid}}">0</span>
                         {% endif %}
-                        <span id="{{item.productid}}">{{item.num|default:0}}</span>
                         <button ga="{{item.productid}}" class="addShopping">+</button>
                     </section>
                 </li>
@@ -67,19 +72,21 @@
             <div id="typediv">
                 <div>
                     {% for item in childList %}
-            <!--              categoryid用于产品分类，         -->
-<!--                        <a href="/market/{{categoryid}}/{{item.childId}}/0/"><span>{{item.childName}}</span></a>-->
+            <!--              categoryid用于产品分类，换成反向解析         -->
+                        {# <a href="/market/{{categoryid}}/{{item.childId}}/0/"><span>{{item.childName}}</span></a> #}
                         <a href="{% url 'axf:mall' categoryid item.childId 0 %}"><span>{{item.childName}}</span></a>
                     {% endfor %}
                 </div>
             </div>
 
+<!--            排序 -->
             <div id="sortdiv">
                 <div>
-<!--                    <a href="/market/{{categoryid}}/{{cid}}/0/" class="sorta"><span>综合排序</span></a>-->
-<!--                    <a href="/market/{{categoryid}}/{{cid}}/1/" class="sorta"><span>销量排序</span></a>-->
-<!--                    <a href="/market/{{categoryid}}/{{cid}}/2/" class="sorta"><span>价格最低</span></a>-->
-<!--                    <a href="/market/{{categoryid}}/{{cid}}/3/" class="sorta"><span>价格最高</span></a>-->
+<!--                    换成反向解析-->
+                    {# <a href="/market/{{categoryid}}/{{cid}}/0/" class="sorta"><span>综合排序</span></a> #}
+                    {# <a href="/market/{{categoryid}}/{{cid}}/1/" class="sorta"><span>销量排序</span></a> #}
+                    {# <a href="/market/{{categoryid}}/{{cid}}/2/" class="sorta"><span>价格最低</span></a> #}
+                    {# <a href="/market/{{categoryid}}/{{cid}}/3/" class="sorta"><span>价格最高</span></a> #}
                     <a href=" {% url 'axf:mall' categoryid cid 0 %}" class="sorta"><span>综合排序</span></a>
                     <a href=" {% url 'axf:mall' categoryid cid 1 %}" class="sorta"><span>销量排序</span></a>
                     <a href=" {% url 'axf:mall' categoryid cid 2 %}" class="sorta"><span>价格最低</span></a>

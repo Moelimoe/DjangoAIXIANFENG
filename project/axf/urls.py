@@ -13,5 +13,12 @@ urlpatterns = [
     # 登录、注册
     re_path(r'^login/$', views.login, name='login'),
     re_path(r'^register/$', views.register, name='register'),
-
+    # 检查用户注册id是否已存在
+    re_path(r'^checkuserid/$', views.checkuserid, name='checkuserid'),
+    re_path(r'^logout/$', views.logout, name='logout'),
+    re_path(r'^signout/$', views.signout, name='signout'),
+    # 修改购物车信息
+    re_path(r'^changetrolley/(\d+)/$', views.changetrolley, name='changetrolley'),
+    # 提交订单
+    re_path(r'^submitorder/$', views.submitorder, name='submitorder'),
 ]
