@@ -10,7 +10,14 @@
 {% block base%}
 <div id="profile">
     <section class="fixed">
-        <span class="glyphicon glyphicon-user"></span>
+        <span>
+            {% if userProfile %}
+            <img  id="user_profile" src="{{userProfile}}" alt="头像丢失" style="font-size: 18px" height="150" width="150"/>
+            {% else %}
+            <span class="glyphicon glyphicon-user">
+            </span>
+            {% endif %}
+        </span>
         <p><a href="/login/">{{ userName|default:"未登录"}}</a></p>
         <p><span class="glyphicon glyphicon-fire"></span><span>{{ userLevel|default:0 }}</span></p>
         <a id="register" href="/register/">注册</a>

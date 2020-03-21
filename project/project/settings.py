@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'axf',
+
 ]
 
 MIDDLEWARE = [
@@ -127,5 +128,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
-# 上传文件路径，注意windows下路径下划线\，还要加上转义字符r
+# 上传文件路径，注意windows下路径是\，而linux是/，还要加上转义字符r
 MEDIA_ROOT = os.path.join(BASE_DIR, r'static\media')
+

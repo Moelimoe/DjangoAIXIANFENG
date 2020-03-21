@@ -10,7 +10,7 @@ class ItemsManager(models.Manager):
     track_id = models.CharField(max_length=20)
     isDelete = models.BooleanField(null=True)
 
-    # 用于重写查询方法
+    # 重写wheel查询方法
     def getqueryset(self):
         # super(StudentsManager, self).get_queryset()就是原始查询集，filter过滤后就是把isDelete是False的留下
         return super(ItemsManager, self).get_queryset()
@@ -23,6 +23,7 @@ class ItemsManager(models.Manager):
     #     attr.isDelete = isDelete
 
 
+# 首页第一栏轮播推荐
 class Wheel(models.Model):
     objects = ItemsManager()
     img = models.CharField(max_length=150)
@@ -31,6 +32,7 @@ class Wheel(models.Model):
     isDelete = models.BooleanField(null=True)
 
 
+# 首页顶部第二栏推荐导航
 class Navigator(models.Model):
     img = models.CharField(max_length=150)
     name = models.CharField(max_length=20)
@@ -38,6 +40,7 @@ class Navigator(models.Model):
     isDelete = models.BooleanField(null=True)
 
 
+# 首页顶部第三栏推荐商品
 class MustBuy(models.Model):
     img = models.CharField(max_length=150)
     name = models.CharField(max_length=20)
@@ -45,13 +48,15 @@ class MustBuy(models.Model):
     isDelete = models.BooleanField(null=True)
 
 
+# 首页第四区域
 class Commodity(models.Model):
     img = models.CharField(max_length=150)
     name = models.CharField(max_length=20)
-    track_id = models.CharField(max_length=20)
+    categoryid = models.CharField(max_length=20)
     isDelete = models.BooleanField(null=True)
 
 
+# 首页第四栏以后分类商品推荐
 class GoodsOnSale(models.Model):
     track_id = models.CharField(max_length=10)
     name = models.CharField(max_length=20)
@@ -89,7 +94,7 @@ class GoodsTypes(models.Model):
     childtypenames = models.CharField(max_length=150)
 
 
-# 商品模型类
+# mall中商品模型类
 class Goods(models.Model):
     # 商品id
     productid = models.CharField(max_length=10)
@@ -141,7 +146,9 @@ class User(models.Model):
     userLevel = models.IntegerField()
     # token验证值，每次登陆之后都会更新
     userToken = models.CharField(max_length=50)
+    # 注册时间
     registerTime = models.DateTimeField(null=True)
+
 
     @classmethod
     def createuser(cls, account, password, name, phone, address, img, level, token):
@@ -161,6 +168,7 @@ class TrolleyManager2(models.Manager):
         return super(TrolleyManager2, self).get_queryset().filter(isDelete=True)
 
 
+# 购物车
 class Trolley(models.Model):
     userAccount = models.CharField(max_length=20)
     productid = models.CharField(max_length=10)
@@ -181,6 +189,7 @@ class Trolley(models.Model):
         return c
 
 
+# 订单
 class Order(models.Model):
     orderid = models.CharField(max_length=20)
     userid = models.CharField(max_length=20)
@@ -190,3 +199,6 @@ class Order(models.Model):
     def createorder(cls, orderid, userid, progress):
         o = cls(orderid=orderid, userid=userid, progress=progress)
         return o
+
+
+

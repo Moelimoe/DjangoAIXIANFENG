@@ -16,7 +16,7 @@
         <div class="swiper-wrapper">
             {% for item in wheelsList %}
                 <div class="swiper-slide">
-                    <a href="#"><img src="{{item.img}}"/> </a>
+                    <a href="/mall/{{item.track_id}}/0/0/"><img src="{{item.img}}"/> </a>
                 </div>
             {% endfor %}
         </div>
@@ -56,12 +56,12 @@
     {# 第四个区域，分为三部分 #}
     <section class="commodity">
         {# part1 #}
-        <h2 href="#"><img src="{{commodity1.img}}}" alt="鲜峰速递"/></h2>
+        <h2 href="/mall/{{item.categoryid}}/0/0/"><img src="{{commodity1.img}}}" alt="鲜峰速递"/></h2>
 
         {# part2 #}
         <fieldset>
             {% for item in commodity2%}
-                <a href="#"><img src="{{item.img}}}" alt="商品区域2"/></a>
+                <a href="/mall/{{item.categoryid}}/0/0/"><img src="{{item.img}}}" alt="商品区域2"/></a>
             {% endfor%}
         </fieldset>
 
@@ -69,7 +69,7 @@
         <ul>
             {% for item in commodity3 %}
             <li>
-                <a href="#">
+                <a href="/mall/{{item.categoryid}}/0/0/">
                     <img src="{{item.img}}}" alt="商品区域3"/>
                     <span>{{item.name}}</span>
                 </a>
@@ -82,7 +82,7 @@
         <ol>
             {% for item in commodity4 %}
             <li>
-                <a href="#">
+                <a href="/mall/{{item.categoryid}}/0/0/">
                     <img src="{{item.img}}}" alt="商品区域4"/>
                 </a>
             </li>
@@ -90,13 +90,13 @@
         </ol>
     </section>
 
-    {# 主要商品区域 #}
+<!--     主要商品区域 -->
     <section class="mainInfo">
         {% for item in mainList%}
         <section>
             <h3>
                 {{item.name}}
-                <a ui-sref="#">更多></a>
+                <a class="moreinfo" href="/mall/{{item.categoryid}}/0/0/">更多></a>
                 <span></span>
             </h3>
             <div>

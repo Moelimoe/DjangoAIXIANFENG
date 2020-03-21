@@ -27,6 +27,14 @@
                 {% endif %}
             </div>
             <div>
+                <img src="temp.png" alt="验证码"/>
+                <br/>
+                <label>
+                    <input class="form-control" type="text" name="verify_code" placeholder="请输入四位数验证码"/>
+                    <input type="hidden" name="verify_code_key" value="{{ filename }}"/>
+                </label>
+            </div>
+            <div>
                 <input type="submit" value="登陆"/>
                 <a href="/register/">没有账号？点我注册</a>
             </div>

@@ -9,6 +9,12 @@
   padding-bottom: 3rem;
   position: fixed; }
 
+/*pc端鼠标变化*/
+.moreinfo {
+  cursor: pointer;
+}
+
+
 /* 第一个区域，轮播墙 */
 #topSwiper {
     /* 轮播高度 */

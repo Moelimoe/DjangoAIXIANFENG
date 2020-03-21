@@ -1,22 +1,26 @@
-import os, random, time, string
+import os, random, time, string, io
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import Wheel, Navigator, MustBuy, Commodity, GoodsOnSale, GoodsTypes, Goods, User, Trolley, Order
 # from project import settings
 from django.conf import settings
 from .forms.login import LoginForm
+from PIL import Image, ImageDraw, ImageFont
+
 
 # Create your views here
 
+
 # 测试页
 def testpage(request):
-    nav = Navigator.objects.all()
-
-    return HttpResponse(f"测试页面完成~{nav.name}")
+    img = '123456myprofile.png'
+    return render(request, 'axf/test.html', {"img": img})
 
 
 # 重定义字典方法，用于模板中
 from django.template.defaulttags import register
+
+
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
@@ -34,58 +38,110 @@ def home(request):
     commodity4 = commodityList[7:11]
     mainList = GoodsOnSale.objects.all()
     return render(request, 'axf/home.html', {"title": "主页", "wheelsList": wheelsList, "navList": navList,
-                                             "mustBuyList": mustBuyList, 'commodity1': commodity1, 'commodity2': commodity2,
+                                             "mustBuyList": mustBuyList, 'commodity1': commodity1,
+                                             'commodity2': commodity2,
                                              'commodity3': commodity3, 'commodity4': commodity4, "mainList": mainList})
 
 
 # 个人资料
 def profile(request):
+    print("进入profile验证userToken", request.session.get('userToken'))
     try:
         # 从服务器获取对应的user信息，自动登录
-        userAccount = request.session.get('userToken')
-        user = User.objects.get(userAccount=userAccount)
+        token = request.session.get('userToken')
+        user = User.objects.get(userToken=token)
         userName = user.userName
         userLevel = user.userLevel
-        return render(request, 'axf/profile.html', {"title": "我的", "userName": userName, "userLevel": userLevel})
+        userProfile = user.userAccount + user.userImg
+        print(userProfile)
+        print("root路径", settings.MEDIA_ROOT)
+        return render(request, 'axf/profile.html', {"title": "我的", "userName": userName, "userLevel": userLevel,
+                                                    'userProfile': userProfile})
     except User.DoesNotExist as e:
         return render(request, 'axf/profile.html', {"title": "我的"})
 
 
 # 登录
 def login(request):
-    # 此种表单写法不能使用ajax实现
+    err_msg = ''
+    code = verifycode(request)
     if request.method == 'POST':
         f = LoginForm(request.POST)
         if f.is_valid():
-            #     cleaned_data为用户提交的内容
             user = f.cleaned_data["username"]
             password = f.cleaned_data["password"]
-            # 理论上判断登录应该用ajax实现，这里使用python逻辑实现密码错误则重定向
+            print("服务器与提交验证码对比", code, request.POST.get('verify_code'))
             try:
                 getuser = User.objects.get(userAccount=user, userPassword=password)
                 userName = getuser.userName
                 userLevel = getuser.userLevel
-                # 创建本次登录的userToken
-                # userToken = ''.join(random.sample(string.ascii_letters+string.digits, 8)) + \
-                #             time.strftime("%H%M%S", time.localtime())
-
-                # 这里username其实是登录时输入的账户，严格来说是userAccount
-                userToken = request.POST.get('username')
+                userProfile = getuser.userAccount + getuser.userImg
+                print("获取用户头像：", userProfile)
+                # 创建本次登录的userToken，并保存到数据库
+                userToken = ''.join(random.sample(string.ascii_letters + string.digits, 8)) + \
+                            time.strftime("%H%M%S", time.localtime())
+                getuser.userToken = userToken
+                getuser.save()
+                # 创建session中token，设置过期时间
                 request.session["userToken"] = userToken
                 # 关闭浏览器账号就过期（0）或其他时间（秒），或者时间对象
                 request.session.set_expiry(0)
-                return render(request, 'axf/profile.html', {"userName": userName, "userLevel": userLevel})
+                return render(request, 'axf/profile.html', {"userName": userName, "userLevel": userLevel,
+                                                            "userProfile": userProfile})
             except User.DoesNotExist as e:
-                return redirect('/login/')
-        # 登录输入格式错误时ajax会自动执行报错
-        # else:
-        #     print("登录输入格式错误")
-        #     return render(request, 'axf/login.html', {"title": "登录", "form": f, "error": f.errors})
+                err_msg = '账号或密码错误'
+
     # 点击未登录，加载登录表单
-    else:
-        f = LoginForm()
-        print("未登录时走这里登录")
-        return render(request, 'axf/login.html', {"title": "登录", "form": f})
+    f = LoginForm()
+    print("未登录时走这里登录", err_msg)
+    return render(request, 'axf/login.html', {"title": "登录", "form": f, 'eroor': err_msg})
+
+
+#  生成验证码，并暂存图片
+def verifycode(request):
+    # 定义背景颜色、宽、高
+    bgcolor = (random.randrange(20, 100), random.randrange(20, 100), random.randrange(20, 100))
+    width = 100
+    height = 50
+
+    # 创建画面对象
+    img = Image.new('RGB', (width, height), bgcolor)
+    # 创建画笔对象
+    draw = ImageDraw.Draw(img)
+    # 调用画笔的point()函数绘制验证码的干扰点
+    for i in range(0, 100):
+        xy = (random.randrange(0, width), random.randrange(0, height))
+        fill = (random.randrange(0, 255), random.randrange(0, 255), 55)
+        draw.point(xy, fill=fill)
+
+    # 定义验证码的备选值
+    _str = string.digits + string.ascii_letters
+    # 随机取四个值作为验证码
+    rand_codes = ''.join(random.sample(_str, 4))
+    # 定义字体大小
+    size = int(min(width / len(rand_codes), height))
+    # 构造字体对象
+    font = ImageFont.truetype(r'C:\Windows\Fonts\Arial.ttf', size)
+    # 构造字体颜色,四个字颜色不同
+    for i in range(4):
+        fontcolor = (255, random.randrange(0, 255), random.randrange(0, 255))
+        draw.text((i * 25, 2), rand_codes[i], font=font, fill=fontcolor)
+    # 释放画笔
+    del draw
+    # 清空缓存
+    # request.session['verify_code'] = ''
+    # # 将验证码缓存入session，后面做进一步验证
+    request.session['verify_code'] = rand_codes
+    print("生成的验证码是：", rand_codes)
+    print("它应该是与session存的验证码一样：", request.session['verify_code'])
+    buf = io.BytesIO()
+    img.save(buf, 'png')
+    # 将内存中的图片数据返回给客户端，MIME类型为png图片
+    # return HttpResponse(buf.getvalue(), 'image/png')
+    # 这样也行
+    # return HttpResponse(buf.getvalue(), 'jpg')
+    img.save(os.path.join(settings.MEDIA_ROOT, "temp.png"))
+    return rand_codes
 
 
 # 登出1
@@ -94,6 +150,8 @@ def signout(request):
     # logout冲突报错maximum recursion depth exceeded
     logout(request)
     return redirect('/profile/')
+
+
 # 登出2
 def logout(request):
     request.session.clear()
@@ -102,31 +160,36 @@ def logout(request):
 
 # 注册
 def register(request):
+    register_failed = False
     if request.POST:
-        userAccount = request.POST.get('userAccount')
-        userPassword = request.POST.get('userPass')
-        userName = request.POST.get('userName')
-        userPhone = request.POST.get('userPhone')
-        userAddress = request.POST.get('userAddress')
-        userLevel = 0
-        # token用于识别用户是否已经登录，每次注册都会刷新
-        # userToken = ''.join(random.sample(string.ascii_letters+string.digits, 8)) + time.strftime("%H%M%S", time.localtime())
-        userToken = request.POST.get('userAccount')
-        userImg = request.FILES['userImg']
-        request.session['userToken'] = userToken
-        # 使用用户的账户拼接，以确保文件名不重复
-        filePath = os.path.join(settings.MEDIA_ROOT, userAccount+userImg.name)
-        with open(filePath, 'wb') as fp:
-            # for info in userImg.chunk():
-            # 不使用.chunk()一块块传也没问题
-            for info in userImg:
-                fp.write(info)
-        userRegister = User.createuser(userAccount, userPassword, userName, userPhone,
-                                       userAddress, userImg, userLevel, userToken)
-        userRegister.save()
-        # 注册成功就导航到profile登录
-        return redirect('/profile/')
-    return render(request, 'axf/register.html', {"title": "注册"})
+        try:
+            userAccount = request.POST.get('userAccount')
+            userPassword = request.POST.get('userPass')
+            userName = request.POST.get('userName')
+            userPhone = request.POST.get('userPhone')
+            userAddress = request.POST.get('userAddress')
+            userLevel = 0
+            # 生成token值注册成功就会自动登录
+            userToken = ''.join(random.sample(string.ascii_letters + string.digits, 8)) + \
+                        time.strftime("%H%M%S", time.localtime())
+            userImg = request.FILES['userImg']
+            request.session['userToken'] = userToken
+            # 使用用户的账户拼接，以确保文件名不重复
+            filePath = os.path.join(settings.MEDIA_ROOT, userAccount + userImg.name)
+            with open(filePath, 'wb') as fp:
+                # for info in userImg.chunk():
+                # 不使用.chunk()一块块传也没问题
+                for info in userImg:
+                    fp.write(info)
+            userRegister = User.createuser(userAccount, userPassword, userName, userPhone,
+                                           userAddress, userImg, userLevel, userToken)
+            userRegister.save()
+            # 注册成功就导航到profile登录
+            return redirect('/profile/')
+        except Exception:
+            register_failed = True
+            return render(request, 'axf/register.html', {"title": "注册", 'register_failed': register_failed})
+    return render(request, 'axf/register.html', {"title": "注册", 'register_failed': register_failed})
 
 
 # 检测注册账户是否已存在
@@ -134,7 +197,7 @@ def checkuserid(request):
     userid = request.POST.get("userid")
     try:
         user = User.objects.get(userAccount=userid)
-        # 返回的第一个参数被register.js中函数的data接收，第二个参数为status
+
         return JsonResponse({"data": "该用户名已被注册", "status": "error"})
     except User.DoesNotExist as e:
         return JsonResponse({"data": "注册成功", "status": "success"})
@@ -166,10 +229,9 @@ def mall(request, categoryid, cid, sortid):
     elif sortid == '3':
         productList = productList.order_by('-price')
     # （如果已登录）取出用户购物车对应商品的数量，加载到mall页面
-    token = request.session.get("userToken")  # token是userAccount
-    # if token:
-    user_Trolley = Trolley.objects.filter(userAccount=token)  # 获取用户的trolley，而后返回其productnum作为默认值显示在mall页面
-    # items_Id_Trolley = [item.productid for item in user_Trolley]
+    token = request.session.get("userToken")  # token是userToken
+    user = User.objects.get(userToken=token)
+    user_Trolley = Trolley.objects.filter(userAccount=user.userAccount)  # 获取用户的trolley，而后返回其productnum作为默认值显示在mall页面
     item_info_Trolley = {}
     for item in user_Trolley:
         item_info_Trolley[item.productid] = item.productnum
@@ -178,18 +240,19 @@ def mall(request, categoryid, cid, sortid):
                                              "item_info_Trolley": item_info_Trolley})
 
 
-# 重定向mall
+# 重定向回mall
 def mall_redirect(request):
-    return redirect('/mall/')
+    return redirect('/mall/104749/0/0/')
 
 
 # 购物车
 def trolley(request):
     token = request.session.get("userToken")
+    user = User.objects.get(userToken=token)
     if not token:
         return redirect('/login/')
-    user = User.objects.get(userAccount=token)
-    trolleyList = Trolley.objects.filter(userAccount=token)
+    user = User.objects.get(userAccount=user.userAccount)
+    trolleyList = Trolley.objects.filter(userAccount=user.userAccount)
     return render(request, 'axf/trolley.html', {"title": "购物车", "userName": user.userName, "userPhone": user.userPhone,
                                                 "userAddress": user.userAddress, "trolleyList": trolleyList})
 
@@ -205,14 +268,13 @@ def changetrolley(request, flag):
     # 加入的商品id
     product_id = request.POST.get("productid")
     # 获取用户信息
-    user = User.objects.get(userAccount=token)
+    user = User.objects.get(userToken=token)
     # 匹配用户购物车
     user_trolley = Trolley.objects.filter(userAccount=user.userAccount)
-    # 匹配商品信息，如果存在相同信息会报错
+    # 匹配商品信息，如果存在重复id会报错，一般来说不应该有重复的id
     detail = Goods.objects.get(productid=product_id)
     # 取当前库存数值
     stores = detail.storenums
-
     # 添加商品0/
     if flag == '0':
         add = additems(user, product_id, stores, detail, user_trolley)
@@ -257,7 +319,6 @@ def changetrolley(request, flag):
     #     return JsonResponse({"status": "success", "data": '√'})
 
 
-
 def additems(user, product_id, stores, detail, user_trolley):
     try:
         # 如果存在购物车走下面
@@ -266,7 +327,7 @@ def additems(user, product_id, stores, detail, user_trolley):
         if stores - find.productnum > 0:
             print("库存大于加入数量", find.productprice)
             find.productnum += 1
-            find.productprice += round(detail.price*1, 2)  # 数量加一之后总价等于当前购物车价格加上添加的数量*单价
+            find.productprice += round(detail.price * 1, 2)  # 数量加一之后总价等于当前购物车价格加上添加的数量*单价
             find.save()
         else:
             print("库存比数量还少了")
@@ -275,7 +336,7 @@ def additems(user, product_id, stores, detail, user_trolley):
         # 如果购物车找不到对应商品
         print("窗口购物车")
         find = Trolley.createtrolley(user.userAccount, product_id, 1, detail.price, True, detail.productimg,
-                                   detail.productlongname, False)
+                                     detail.productlongname, False)
         find.save()
     print("最后走到这", "product_id:", product_id)
     return find
@@ -288,7 +349,7 @@ def subitems(product_id, user_trolley, detail):
     if find.productnum > 0:
         find.productnum -= 1
         print("商品减少之前的价格", find.productprice)
-        find.productprice -= round(detail.price*1, 2)  # 数量减一之后，总价等于当前总商品价格减去添加的数量*单价
+        find.productprice -= round(detail.price * 1, 2)  # 数量减一之后，总价等于当前总商品价格减去添加的数量*单价
         print("商品减少之后的价格", find.productprice)
         if find.productnum == 0:
             print("变为0要删除数据")
@@ -297,7 +358,7 @@ def subitems(product_id, user_trolley, detail):
             find.save()
             print("find保存了")
         return find
-# 如果数量等于0了购物车商品要删除，否则保存数据到购物车
+    # 如果数量等于0了购物车商品要删除，否则保存数据到购物车
     else:
         print("find为", find.productnum, "要删除了")
         find.delete()
@@ -307,19 +368,20 @@ def subitems(product_id, user_trolley, detail):
 # 提交订单
 def submitorder(request):
     token = request.session.get("userToken")
-    user_Trolley = Trolley.objects.filter(userAccount=token)
+    user = User.objects.get(userToken=token)
+    user_Trolley = Trolley.objects.filter(userAccount=user.userAccount)
     total_price = 0
     item_list_to_order = []
     for item_info in user_Trolley:
         if item_info.isChose:
             # 总价
-            total_price += item_info.productnum*item_info.productprice
+            total_price += item_info.productnum * item_info.productprice
             # print(生成用户订单)
-            orderid = ''.join(random.sample(string.ascii_letters+string.digits, 8)) \
+            orderid = ''.join(random.sample(string.ascii_letters + string.digits, 8)) \
                       + time.strftime("%Y%m%d%H%M", time.localtime())
             print(orderid)
             # 将选中的集合
-            item_list_to_order.append(Order.createorder(orderid=orderid, userid=token, progress=0))
+            item_list_to_order.append(Order.createorder(orderid=orderid, userid=user.userAccount, progress=0))
             # 将购物车对应物品删除，无需物理删除，因为日后可能还要查看记录
             print("删除商品信息前", item_info.isDelete)
             item_info.isDelete = True
@@ -329,12 +391,6 @@ def submitorder(request):
     Order.objects.bulk_create(item_list_to_order)
     print("总价：", total_price)
     return JsonResponse({"status": "success", "data": total_price})
-
-
-
-
-
-
 
 
 
