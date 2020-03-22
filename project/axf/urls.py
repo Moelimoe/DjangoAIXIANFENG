@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
     re_path(r'^test/$', views.testpage, name='test'),
+    # re_path(r'^/$', views.home, name='home'),
     re_path(r'^home/$', views.home, name='home'),
     # re_path(r'^mall/(\d+)/(\d+)/(\d+)/$', views.mall, name='mall'),
     re_path(r'^mall/(\d+)/(\d+)/(\d+)/$', views.mall, name='mall'),
@@ -23,7 +24,9 @@ urlpatterns = [
     re_path(r'^changetrolley/(\d+)/$', views.changetrolley, name='changetrolley'),
     # 提交订单
     re_path(r'^submitorder/$', views.submitorder, name='submitorder'),
-
+    # 验证码
+    re_path(r'^captcha/$', views.captcha, name='captcha'),
+    re_path(r'^(\s+)/(\d?)/(\d?)/(\d?)/$', views.testpage, name='base'),
 ]
 
 # 实现登录、注册或进入个人资料时展示头像
@@ -32,4 +35,5 @@ urlpatterns += static('/profile/', document_root=settings.MEDIA_ROOT)
 urlpatterns += static('/register/', document_root=settings.MEDIA_ROOT)
 
 
+# 测试页
 urlpatterns += static('/test/', document_root=settings.MEDIA_ROOT)

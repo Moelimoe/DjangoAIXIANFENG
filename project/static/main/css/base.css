@@ -28,7 +28,7 @@ header, footer{
 }
 /*  header在最上面(靠左) */
 header{
-    background: aqua;
+    background: #a6e1ec;
     top:0;
     left:0;
 }
@@ -99,4 +99,13 @@ a:active{
     text-decoration:none
 }
 
-
+h4 {
+    text-align: center;
+    position: fixed;
+    z-index: +100;
+    width: 100%;
+    border-bottom: 0.04rem solid lightgrey;
+    line-height: 1.5rem;
+    background: yellow;
+    top: 0;
+}

@@ -102,7 +102,7 @@
   font-size: 0.35rem; }
 .commodity ul li img {
   width: 2.5rem;
-  height: 90px;
+  height: 2.5rem;
 }
 
 
@@ -182,6 +182,17 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2; }
+/*#img0 {*/
+/*  height: 10rem;*/
+/*  width: auto;*/
+/*  padding: 5%;*/
+/*}*/
+
+.sub-img {
+  height: 2.5rem;
+  /*width: ;*/
+}
+
 .mainInfo > section > ul > li > button {
   border: 1px solid lightgrey;
   border-radius: 1111px;
@@ -200,3 +211,5 @@
   position: relative;
   top: -0.05rem;
   margin: auto; }
+
+

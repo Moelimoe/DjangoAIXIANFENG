@@ -5,7 +5,17 @@
     <title>测试页面</title>
 </head>
 <body>
-<p>{{img}}</p>
-    <img src="{{img}}"/>
+    <form action="/test/" method="post">
+        <img src="/captcha/" alt="验证码"/>
+        <div>
+            <label>
+                <input type="text" name="verify_code" placeholder="请输入图片中验证码">
+            </label>
+            <input type="submit" value="验证"/>
+        </div>
+    </form>
+    <a>验证结果：</a>
+    <p style="color: red">{{msg}}</p>
+    <p>{{ s1 }}</p>
 </body>
 </html>

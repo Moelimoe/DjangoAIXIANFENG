@@ -8,6 +8,7 @@
 {% endblock linkscript %}
 
 {% block base%}
+<h4><b>主页</b></h4>
 <div id="home">
     {# 区域一，轮播墙 #}
     {# swiper-container、swiper-slide由main下的swiper.min.css控制 #}
@@ -56,12 +57,12 @@
     {# 第四个区域，分为三部分 #}
     <section class="commodity">
         {# part1 #}
-        <h2 href="/mall/{{item.categoryid}}/0/0/"><img src="{{commodity1.img}}}" alt="鲜峰速递"/></h2>
+        <h2 href="/mall/{{item.categoryid}}/0/0/"><img src="{{commodity1.img}}" alt="鲜峰速递"/></h2>
 
         {# part2 #}
         <fieldset>
             {% for item in commodity2%}
-                <a href="/mall/{{item.categoryid}}/0/0/"><img src="{{item.img}}}" alt="商品区域2"/></a>
+                <a href="/mall/{{item.categoryid}}/0/0/"><img src="{{item.img}}" alt="商品区域2"/></a>
             {% endfor%}
         </fieldset>
 
@@ -70,7 +71,7 @@
             {% for item in commodity3 %}
             <li>
                 <a href="/mall/{{item.categoryid}}/0/0/">
-                    <img src="{{item.img}}}" alt="商品区域3"/>
+                    <img src="{{item.img}}" alt="商品区域3"/>
                     <span>{{item.name}}</span>
                 </a>
 
@@ -83,7 +84,7 @@
             {% for item in commodity4 %}
             <li>
                 <a href="/mall/{{item.categoryid}}/0/0/">
-                    <img src="{{item.img}}}" alt="商品区域4"/>
+                    <img src="{{item.img}}" alt="商品区域4"/>
                 </a>
             </li>
             {% endfor %}
@@ -100,12 +101,12 @@
                 <span></span>
             </h3>
             <div>
-                <a href="#"><img src="{{item.img}}" alt="item.name"/></a>
+                <a href="#"><img id="img0" src="{{item.img}}" alt="item.name"/></a>
             </div>
             <ul>
                 <li>
                     <a href="#">
-                        <img src="{{item.img1}}"/>
+                        <img class="sub-img" src="{{item.img1}}"/>
                         <span class="description">{{item.longname1}}</span>
                         <span>¥{{item.price1}}</span>
                         <s>¥{{item.marketprice1}}</s>
@@ -114,7 +115,7 @@
                 </li>
                 <li>
                     <a href="#">
-                        <img src="{{item.img2}}"/>
+                        <img class="sub-img" src="{{item.img2}}"/>
                         <span class="description">{{item.longname2}}</span>
                         <span>¥{{item.price2}}</span>
                         <s>¥{{item.marketprice2}}</s>
@@ -123,7 +124,7 @@
                 </li>
                 <li>
                     <a href="#">
-                        <img src="{{item.img3}}"/>
+                        <img class="sub-img" src="{{item.img3}}"/>
                         <span class="description">{{item.longname3}}</span>
                         <span>¥{{item.price3}}</span>
                         <s>¥{{item.marketprice3}}</s>

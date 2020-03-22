@@ -6,15 +6,16 @@
     font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
     overflow: hidden; }
 
-h3 {
-    text-align: center;
-    position: fixed;
-    z-index: +100;
-    width: 100%;
-    border-bottom: 0.04rem solid lightgrey;
-    line-height: 1.5rem;
-    background: white;
-    top: 0; }
+/*h3 {*/
+/*    text-align: center;*/
+/*    position: fixed;*/
+/*    z-index: +100;*/
+/*    width: 100%;*/
+/*    border-bottom: 0.04rem solid lightgrey;*/
+/*    line-height: 1.5rem;*/
+/*    background: white;*/
+/*    top: 0; */
+/*}*/
 
 
 

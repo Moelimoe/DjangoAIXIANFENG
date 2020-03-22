@@ -12,9 +12,16 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 # 测试页
-def testpage(request):
-    img = '123456myprofile.png'
-    return render(request, 'axf/test.html', {"img": img})
+def testpage(request, s1, d1, d2, d3):
+    verify_msg = ''
+    _captcha_submit = request.POST.get('verify_code').lower()
+    # 注意这里提交的code需要小写，而服务器的code已经小写，这样分开做是为了避免当验证码过期了变为空值取不到session抛出异常
+    _captcha_server = request.session.get('verify_code')
+    if _captcha_server == _captcha_submit:
+        return render(request, 'axf/test.html', {"msg": "验证成功"})
+    else:
+        verify_msg = '验证失败'
+    return render(request, 'axf/test.html', {"msg": verify_msg, "名称": s1})
 
 
 # 重定义字典方法，用于模板中
@@ -53,8 +60,7 @@ def profile(request):
         userName = user.userName
         userLevel = user.userLevel
         userProfile = user.userAccount + user.userImg
-        print(userProfile)
-        print("root路径", settings.MEDIA_ROOT)
+        # print(userProfile)
         return render(request, 'axf/profile.html', {"title": "我的", "userName": userName, "userLevel": userLevel,
                                                     'userProfile': userProfile})
     except User.DoesNotExist as e:
@@ -64,41 +70,45 @@ def profile(request):
 # 登录
 def login(request):
     err_msg = ''
-    code = verifycode(request)
     if request.method == 'POST':
         f = LoginForm(request.POST)
         if f.is_valid():
             user = f.cleaned_data["username"]
             password = f.cleaned_data["password"]
-            print("服务器与提交验证码对比", code, request.POST.get('verify_code'))
-            try:
-                getuser = User.objects.get(userAccount=user, userPassword=password)
-                userName = getuser.userName
-                userLevel = getuser.userLevel
-                userProfile = getuser.userAccount + getuser.userImg
-                print("获取用户头像：", userProfile)
-                # 创建本次登录的userToken，并保存到数据库
-                userToken = ''.join(random.sample(string.ascii_letters + string.digits, 8)) + \
-                            time.strftime("%H%M%S", time.localtime())
-                getuser.userToken = userToken
-                getuser.save()
-                # 创建session中token，设置过期时间
-                request.session["userToken"] = userToken
-                # 关闭浏览器账号就过期（0）或其他时间（秒），或者时间对象
-                request.session.set_expiry(0)
-                return render(request, 'axf/profile.html', {"userName": userName, "userLevel": userLevel,
-                                                            "userProfile": userProfile})
-            except User.DoesNotExist as e:
-                err_msg = '账号或密码错误'
-
+            # 验证码进行比对，服务端的小写化再存入session时已执行
+            captcha_submit = request.POST.get('verify_code').lower()
+            captcha_server = request.session.get('verify_code')
+            print(captcha_submit, captcha_server)
+            if captcha_server == captcha_submit:
+                try:
+                    getuser = User.objects.get(userAccount=user, userPassword=password)
+                    userName = getuser.userName
+                    userLevel = getuser.userLevel
+                    userProfile = getuser.userAccount + getuser.userImg
+                    print("获取用户头像：", userProfile)
+                    # 创建本次登录的userToken，并保存到数据库
+                    userToken = ''.join(random.sample(string.ascii_letters + string.digits, 8)) + \
+                                time.strftime("%H%M%S", time.localtime())
+                    getuser.userToken = userToken
+                    getuser.save()
+                    # 创建session中token，设置过期时间
+                    request.session["userToken"] = userToken
+                    # 关闭浏览器账号就过期（0）或其他时间（秒），或者时间对象
+                    request.session.set_expiry(0)
+                    return render(request, 'axf/profile.html', {"userName": userName, "userLevel": userLevel,
+                                                                "userProfile": userProfile})
+                except User.DoesNotExist as e:
+                    err_msg = '账号或密码错误'
+            else:
+                err_msg = '验证码错误'
     # 点击未登录，加载登录表单
     f = LoginForm()
     print("未登录时走这里登录", err_msg)
-    return render(request, 'axf/login.html', {"title": "登录", "form": f, 'eroor': err_msg})
+    return render(request, 'axf/login.html', {"title": "登录", "form": f, 'error': err_msg})
 
 
-#  生成验证码，并暂存图片
-def verifycode(request):
+#  生成验证码，# 可以直接可以在html中的img引用
+def captcha(request):
     # 定义背景颜色、宽、高
     bgcolor = (random.randrange(20, 100), random.randrange(20, 100), random.randrange(20, 100))
     width = 100
@@ -128,20 +138,19 @@ def verifycode(request):
         draw.text((i * 25, 2), rand_codes[i], font=font, fill=fontcolor)
     # 释放画笔
     del draw
-    # 清空缓存
-    # request.session['verify_code'] = ''
-    # # 将验证码缓存入session，后面做进一步验证
-    request.session['verify_code'] = rand_codes
+    # # 将验证码缓存入session，后面做进一步验证，注意应该在这里存入的时候变为小写，
+    # 否则验证码过期就变成了空，再进行lower()操作会抛出异常
+    request.session['verify_code'] = rand_codes.lower()
+    # 验证码有效时间60秒
+    request.session.set_expiry(60)
     print("生成的验证码是：", rand_codes)
     print("它应该是与session存的验证码一样：", request.session['verify_code'])
     buf = io.BytesIO()
     img.save(buf, 'png')
     # 将内存中的图片数据返回给客户端，MIME类型为png图片
-    # return HttpResponse(buf.getvalue(), 'image/png')
+    return HttpResponse(buf.getvalue(), 'image/jpg')
     # 这样也行
     # return HttpResponse(buf.getvalue(), 'jpg')
-    img.save(os.path.join(settings.MEDIA_ROOT, "temp.png"))
-    return rand_codes
 
 
 # 登出1
@@ -228,13 +237,15 @@ def mall(request, categoryid, cid, sortid):
         productList = productList.order_by('price')
     elif sortid == '3':
         productList = productList.order_by('-price')
-    # （如果已登录）取出用户购物车对应商品的数量，加载到mall页面
     token = request.session.get("userToken")  # token是userToken
-    user = User.objects.get(userToken=token)
-    user_Trolley = Trolley.objects.filter(userAccount=user.userAccount)  # 获取用户的trolley，而后返回其productnum作为默认值显示在mall页面
-    item_info_Trolley = {}
-    for item in user_Trolley:
-        item_info_Trolley[item.productid] = item.productnum
+    # （如果已登录）取出用户购物车对应商品的数量，加载到mall页面
+    print("useToken", token)
+    item_info_Trolley = {}  # 储存用户购物车的物品
+    if token:
+        user = User.objects.get(userToken=token)
+        user_Trolley = Trolley.objects.filter(userAccount=user.userAccount)  # 获取用户的trolley，而后返回其productnum作为默认值显示在mall页面
+        for item in user_Trolley:
+            item_info_Trolley[item.productid] = item.productnum
     return render(request, 'axf/mall.html', {"title": "商城", 'leftBar': leftBar, 'productList': productList,
                                              "childList": childList, "categoryid": categoryid, "cid": cid,
                                              "item_info_Trolley": item_info_Trolley})
@@ -248,10 +259,9 @@ def mall_redirect(request):
 # 购物车
 def trolley(request):
     token = request.session.get("userToken")
-    user = User.objects.get(userToken=token)
     if not token:
         return redirect('/login/')
-    user = User.objects.get(userAccount=user.userAccount)
+    user = User.objects.get(userToken=token)
     trolleyList = Trolley.objects.filter(userAccount=user.userAccount)
     return render(request, 'axf/trolley.html', {"title": "购物车", "userName": user.userName, "userPhone": user.userPhone,
                                                 "userAddress": user.userAddress, "trolleyList": trolleyList})

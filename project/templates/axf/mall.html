@@ -8,6 +8,7 @@
 {% endblock linkscript %}
 
 {% block base%}
+<h4><b>商城</b></h4>
 <div id="mall">
     <aside>
         <!-- 闪购商城左侧导航栏 -->
@@ -17,8 +18,12 @@
                 <li>
                     <span class="yellowSlide"></span>
 <!--                    传到指定id的页面，typeid导向对应分类的商品页 -->
-                    {# <a href="/mall/{{item.typeid}}/0">{{item.typename}}</a> #}
+                    {# <a href="/mall/{{item.typeid}}/0">{{item.typename}}</a>可以改成如下方式#}
+                    {% if categoryid == item.typeid%}
+                    <a href="{% url 'axf:mall' item.typeid 0 0 %}" style="color: #761c19">{{item.typename}}</a>
+                    {% else %}
                     <a href="{% url 'axf:mall' item.typeid 0 0 %}">{{item.typename}}</a>
+                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>
