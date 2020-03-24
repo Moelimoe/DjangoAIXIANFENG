@@ -1,0 +1,43 @@
+卷 其他 的文件夹 PATH 列表
+卷序列号为 4875-790C
+G:.
+├─.idea
+│  └─inspectionProfiles
+├─axf
+│  ├─forms
+│  │  └─__pycache__
+│  ├─migrations
+│  │  └─__pycache__
+│  └─__pycache__
+├─project
+│  └─__pycache__
+├─static
+│  ├─home
+│  │  ├─css
+│  │  ├─img
+│  │  ├─js
+│  │  └─json
+│  ├─main
+│  │  ├─css
+│  │  ├─fonts
+│  │  ├─img
+│  │  └─js
+│  ├─mall
+│  │  ├─css
+│  │  ├─img
+│  │  ├─js
+│  │  └─json
+│  ├─media
+│  ├─profile
+│  │  ├─css
+│  │  ├─img
+│  │  ├─js
+│  │  └─json
+│  └─trolley
+│      ├─css
+│      ├─img
+│      ├─js
+│      └─json
+├─templates
+│  └─axf
+└─__pycache__
