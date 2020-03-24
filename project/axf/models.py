@@ -12,8 +12,8 @@ class ItemsManager(models.Manager):
 
     # 重写wheel查询方法
     def getqueryset(self):
-        # super(StudentsManager, self).get_queryset()就是原始查询集，filter过滤后就是把isDelete是False的留下
-        return super(ItemsManager, self).get_queryset()
+        # super(StudentsManager, self).get_queryset()原始查询集，filter过滤后就是把isDelete是False的留下
+        return super(ItemsManager, self).get_queryset().filter(isDelete=False)
 
     # def alterAttribution(self, img, name, track_id, isDelete):
     #     attr = self.model()
@@ -30,6 +30,7 @@ class Wheel(models.Model):
     name = models.CharField(max_length=20)
     track_id = models.CharField(max_length=20)
     isDelete = models.BooleanField(null=True)
+    # obj1 = ItemsManager()
 
 
 # 首页顶部第二栏推荐导航

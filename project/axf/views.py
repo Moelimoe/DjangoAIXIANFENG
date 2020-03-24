@@ -2,32 +2,29 @@ import os, random, time, string, io
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import Wheel, Navigator, MustBuy, Commodity, GoodsOnSale, GoodsTypes, Goods, User, Trolley, Order
-# from project import settings
+# from project import settings  # 效果同下一条
 from django.conf import settings
 from .forms.login import LoginForm
+from .forms.register import RegisterForm
 from PIL import Image, ImageDraw, ImageFont
-
-
-# Create your views here
-
-
-# 测试页
-def testpage(request, s1, d1, d2, d3):
-    verify_msg = ''
-    _captcha_submit = request.POST.get('verify_code').lower()
-    # 注意这里提交的code需要小写，而服务器的code已经小写，这样分开做是为了避免当验证码过期了变为空值取不到session抛出异常
-    _captcha_server = request.session.get('verify_code')
-    if _captcha_server == _captcha_submit:
-        return render(request, 'axf/test.html', {"msg": "验证成功"})
-    else:
-        verify_msg = '验证失败'
-    return render(request, 'axf/test.html', {"msg": verify_msg, "名称": s1})
-
-
-# 重定义字典方法，用于模板中
 from django.template.defaulttags import register
 
 
+# 测试页
+def testpage(request):
+    verify_msg = ''
+    if request.POST:
+        _captcha_submit = request.POST.get('verify_code').lower()
+        # 注意这里提交的验证码需要小写，服务器的验证码生成时已经小写，这样分开做是为了避免当验证码过期了再使用lower()函数而报错
+        _captcha_server = request.session.get('verify_code')
+        if _captcha_server == _captcha_submit:
+            verify_msg = '验证成功'
+        else:
+            verify_msg = '验证失败'
+    return render(request, 'axf/test.html', {"msg": verify_msg})
+
+
+# 重定义字典方法，方便模板中使用字典
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
@@ -53,6 +50,7 @@ def home(request):
 # 个人资料
 def profile(request):
     print("进入profile验证userToken", request.session.get('userToken'))
+    # 尝试获取用户登录信息
     try:
         # 从服务器获取对应的user信息，自动登录
         token = request.session.get('userToken')
@@ -70,12 +68,13 @@ def profile(request):
 # 登录
 def login(request):
     err_msg = ''
+    # 判断是否提交POST进行登录
     if request.method == 'POST':
         f = LoginForm(request.POST)
         if f.is_valid():
             user = f.cleaned_data["username"]
             password = f.cleaned_data["password"]
-            # 验证码进行比对，服务端的小写化再存入session时已执行
+            # 验证码进行比对，服务端的验证码小写化在存入session时已执行过
             captcha_submit = request.POST.get('verify_code').lower()
             captcha_server = request.session.get('verify_code')
             print(captcha_submit, captcha_server)
@@ -85,7 +84,7 @@ def login(request):
                     userName = getuser.userName
                     userLevel = getuser.userLevel
                     userProfile = getuser.userAccount + getuser.userImg
-                    print("获取用户头像：", userProfile)
+                    print("获取用户头像文件路径：", userProfile)
                     # 创建本次登录的userToken，并保存到数据库
                     userToken = ''.join(random.sample(string.ascii_letters + string.digits, 8)) + \
                                 time.strftime("%H%M%S", time.localtime())
@@ -107,14 +106,13 @@ def login(request):
     return render(request, 'axf/login.html', {"title": "登录", "form": f, 'error': err_msg})
 
 
-#  生成验证码，# 可以直接可以在html中的img引用
+#  生成验证码，可直接使用HttpResponse返回到html中，然后在img引用生成的验证码，实现及时性
 def captcha(request):
     # 定义背景颜色、宽、高
     bgcolor = (random.randrange(20, 100), random.randrange(20, 100), random.randrange(20, 100))
     width = 100
     height = 50
-
-    # 创建画面对象
+    # 创建画布
     img = Image.new('RGB', (width, height), bgcolor)
     # 创建画笔对象
     draw = ImageDraw.Draw(img)
@@ -123,15 +121,14 @@ def captcha(request):
         xy = (random.randrange(0, width), random.randrange(0, height))
         fill = (random.randrange(0, 255), random.randrange(0, 255), 55)
         draw.point(xy, fill=fill)
-
-    # 定义验证码的备选值
+    # 定义验证码的备选值————取所有字母和数字的组合
     _str = string.digits + string.ascii_letters
-    # 随机取四个值作为验证码
+    # 随机在其中取四个值作为验证码
     rand_codes = ''.join(random.sample(_str, 4))
     # 定义字体大小
     size = int(min(width / len(rand_codes), height))
     # 构造字体对象
-    font = ImageFont.truetype(r'C:\Windows\Fonts\Arial.ttf', size)
+    font = ImageFont.truetype(r'http://moelimoe.fun/wp-content/uploads/2020/%E5%AD%97%E4%BD%93/arial/arial.ttf', size)
     # 构造字体颜色,四个字颜色不同
     for i in range(4):
         fontcolor = (255, random.randrange(0, 255), random.randrange(0, 255))
@@ -141,27 +138,27 @@ def captcha(request):
     # # 将验证码缓存入session，后面做进一步验证，注意应该在这里存入的时候变为小写，
     # 否则验证码过期就变成了空，再进行lower()操作会抛出异常
     request.session['verify_code'] = rand_codes.lower()
-    # 验证码有效时间60秒
+    # 设置验证码有效时间(秒)
     request.session.set_expiry(60)
-    print("生成的验证码是：", rand_codes)
-    print("它应该是与session存的验证码一样：", request.session['verify_code'])
+    # BytesIO()可以实现在内存中读写bytes
     buf = io.BytesIO()
     img.save(buf, 'png')
-    # 将内存中的图片数据返回给客户端，MIME类型为png图片
+    # 将内存中的图片数据返回给客户端，在html的img中引用src="/captcha/"即可
     return HttpResponse(buf.getvalue(), 'image/jpg')
-    # 这样也行
-    # return HttpResponse(buf.getvalue(), 'jpg')
+    # png也行
+    # return HttpResponse(buf.getvalue(), 'png')
 
 
 # 登出1
-# 退出登录使用logout(request)，如果函数命名为logout()，则两则会冲突返回错误Maximum recursion depth exceeded
+# 1、退出登录使用logout(request)，函数需使用不同的名字
+# 注意：如果函数命名为logout()则会和登出函数logout()重名，会导致冲突返回错误Maximum recursion depth exceeded
 def signout(request):
-    # logout冲突报错maximum recursion depth exceeded
     logout(request)
     return redirect('/profile/')
 
 
 # 登出2
+# 使用clear()清除session实现登出
 def logout(request):
     request.session.clear()
     return render(request, 'axf/profile.html')
@@ -169,44 +166,46 @@ def logout(request):
 
 # 注册
 def register(request):
-    register_failed = False
+    get_registered = ''
     if request.POST:
-        try:
-            userAccount = request.POST.get('userAccount')
-            userPassword = request.POST.get('userPass')
-            userName = request.POST.get('userName')
-            userPhone = request.POST.get('userPhone')
-            userAddress = request.POST.get('userAddress')
-            userLevel = 0
-            # 生成token值注册成功就会自动登录
-            userToken = ''.join(random.sample(string.ascii_letters + string.digits, 8)) + \
-                        time.strftime("%H%M%S", time.localtime())
-            userImg = request.FILES['userImg']
-            request.session['userToken'] = userToken
-            # 使用用户的账户拼接，以确保文件名不重复
-            filePath = os.path.join(settings.MEDIA_ROOT, userAccount + userImg.name)
-            with open(filePath, 'wb') as fp:
-                # for info in userImg.chunk():
-                # 不使用.chunk()一块块传也没问题
-                for info in userImg:
-                    fp.write(info)
-            userRegister = User.createuser(userAccount, userPassword, userName, userPhone,
-                                           userAddress, userImg, userLevel, userToken)
-            userRegister.save()
-            # 注册成功就导航到profile登录
-            return redirect('/profile/')
-        except Exception:
-            register_failed = True
-            return render(request, 'axf/register.html', {"title": "注册", 'register_failed': register_failed})
-    return render(request, 'axf/register.html', {"title": "注册", 'register_failed': register_failed})
+        f = RegisterForm(request.POST)
+        if f.is_valid():
+            try:
+                userAccount = request.POST.get('username')  # name为"username"，再register.py中RegisterForm里
+                userPassword = request.POST.get('password')  # 同上
+                userName = request.POST.get('userName')
+                userPhone = request.POST.get('userPhone')
+                userAddress = request.POST.get('userAddress')
+                userLevel = 0
+                # 生成token值注册成功就会自动登录
+                userToken = ''.join(random.sample(string.ascii_letters + string.digits, 8)) + \
+                            time.strftime("%H%M%S", time.localtime())
+                userImg = request.FILES['userImg']
+                request.session['userToken'] = userToken
+                # 使用用户的账户拼接，以确保文件名不重复
+                filePath = os.path.join(settings.MEDIA_ROOT, userAccount + userImg.name)
+                with open(filePath, 'wb') as fp:
+                    # for info in userImg.chunk():
+                    for info in userImg:
+                        fp.write(info)
+                userRegister = User.createuser(userAccount, userPassword, userName, userPhone,
+                                               userAddress, userImg, userLevel, userToken)
+                userRegister.save()
+                # 注册成功就导航到profile登录
+                return redirect('/profile/')
+            except Exception as e:
+                get_registered = "注册失败，请检查你填写的信息是否正确"
+                print("表单验证失败，错误信息：", e)
+    # 未提交POST信息，刚进入页面则get_registered为空，否则提示注册失败
+    f = RegisterForm()
+    return render(request, 'axf/register.html', {"title": "注册", "form": f, 'get_registered': get_registered})
 
 
-# 检测注册账户是否已存在
+# 检测注册账户是否已存在，返回Json响应提示并阻断用户提交注册
 def checkuserid(request):
     userid = request.POST.get("userid")
     try:
         user = User.objects.get(userAccount=userid)
-
         return JsonResponse({"data": "该用户名已被注册", "status": "error"})
     except User.DoesNotExist as e:
         return JsonResponse({"data": "注册成功", "status": "success"})
@@ -288,9 +287,7 @@ def changetrolley(request, flag):
     # 添加商品0/
     if flag == '0':
         add = additems(user, product_id, stores, detail, user_trolley)
-        print("增加商品", "商品价格", add.productprice, "商品数量", add.productnum)
         return JsonResponse({"data": add.productnum, "totalPrice": add.productprice, "status": "success"})
-
     # 减少商品1/
     elif flag == '1':
         try:
@@ -305,9 +302,7 @@ def changetrolley(request, flag):
     # 单选购物车商品
     elif flag == '2':
         chosen_item = Trolley.objects.filter(userAccount=user.userAccount).get(productid=product_id)
-        print(f"选择物品改变前{chosen_item.isChose}")
         chosen_item.isChose = not chosen_item.isChose
-        print(f"选择物品改变后{chosen_item.isChose}")
         chosen_item.save()
         choose = ''
         if chosen_item.isChose:
@@ -331,7 +326,7 @@ def changetrolley(request, flag):
 
 def additems(user, product_id, stores, detail, user_trolley):
     try:
-        # 如果存在购物车走下面
+        # 尝试拉取用户购物车数据
         find = user_trolley.get(productid=product_id)
         # 判断库存数量是否大于购物车对应商品数量
         if stores - find.productnum > 0:
@@ -343,34 +338,26 @@ def additems(user, product_id, stores, detail, user_trolley):
             print("库存比数量还少了")
             pass
     except Trolley.DoesNotExist as e:
-        # 如果购物车找不到对应商品
-        print("窗口购物车")
+        # 购物车找不到对应商品
         find = Trolley.createtrolley(user.userAccount, product_id, 1, detail.price, True, detail.productimg,
                                      detail.productlongname, False)
         find.save()
-    print("最后走到这", "product_id:", product_id)
     return find
 
 
 def subitems(product_id, user_trolley, detail):
-    # 试图寻找用户购物车信息
+    # 在数据库拉取用户购物车信息
     find = user_trolley.get(productid=product_id)
-    print("find找到了")
     if find.productnum > 0:
         find.productnum -= 1
-        print("商品减少之前的价格", find.productprice)
         find.productprice -= round(detail.price * 1, 2)  # 数量减一之后，总价等于当前总商品价格减去添加的数量*单价
-        print("商品减少之后的价格", find.productprice)
         if find.productnum == 0:
-            print("变为0要删除数据")
             find.delete()
         else:
             find.save()
-            print("find保存了")
         return find
     # 如果数量等于0了购物车商品要删除，否则保存数据到购物车
     else:
-        print("find为", find.productnum, "要删除了")
         find.delete()
         find.save()
 
@@ -389,13 +376,10 @@ def submitorder(request):
             # print(生成用户订单)
             orderid = ''.join(random.sample(string.ascii_letters + string.digits, 8)) \
                       + time.strftime("%Y%m%d%H%M", time.localtime())
-            print(orderid)
             # 将选中的集合
             item_list_to_order.append(Order.createorder(orderid=orderid, userid=user.userAccount, progress=0))
             # 将购物车对应物品删除，无需物理删除，因为日后可能还要查看记录
-            print("删除商品信息前", item_info.isDelete)
             item_info.isDelete = True
-            print("删除商品信息后", item_info.isDelete)
             item_info.save()
     # 将所有订单全部加入订单记录
     Order.objects.bulk_create(item_list_to_order)
