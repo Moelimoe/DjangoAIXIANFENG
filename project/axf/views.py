@@ -32,6 +32,7 @@ def get_item(dictionary, key):
 
 # 主页
 def home(request):
+    in_home = True
     wheelsList = Wheel.objects.all()
     navList = Navigator.objects.all()
     mustBuyList = MustBuy.objects.all()
@@ -43,12 +44,14 @@ def home(request):
     mainList = GoodsOnSale.objects.all()
     return render(request, 'axf/home.html', {"title": "主页", "wheelsList": wheelsList, "navList": navList,
                                              "mustBuyList": mustBuyList, 'commodity1': commodity1,
-                                             'commodity2': commodity2,
-                                             'commodity3': commodity3, 'commodity4': commodity4, "mainList": mainList})
+                                             'commodity2': commodity2, 'commodity3': commodity3,
+                                             'commodity4': commodity4, "mainList": mainList,
+                                             "in_home": in_home})
 
 
 # 个人资料
 def profile(request):
+    in_profile = True
     print("进入profile验证userToken", request.session.get('userToken'))
     # 尝试获取用户登录信息
     try:
@@ -60,9 +63,9 @@ def profile(request):
         userProfile = user.userAccount + user.userImg
         # print(userProfile)
         return render(request, 'axf/profile.html', {"title": "我的", "userName": userName, "userLevel": userLevel,
-                                                    'userProfile': userProfile})
+                                                    'userProfile': userProfile, "in_profile": in_profile})
     except User.DoesNotExist as e:
-        return render(request, 'axf/profile.html', {"title": "我的"})
+        return render(request, 'axf/profile.html', {"title": "我的", "in_profile": in_profile})
 
 
 # 登录
@@ -214,6 +217,9 @@ def checkuserid(request):
 # 商城
 def mall(request, categoryid, cid, sortid):
     '''categoryid为产品大分类；cid为产品小分类，用于查询；sortid为排序id；'''
+    in_mall = True
+    order_dict = {'0': "综合排序", '1': "销量排序", '2': "价格最低", '3': "价格最高"}
+
     leftBar = GoodsTypes.objects.all()
     # 展示mall页面所有商品信息
     if cid == '0':
@@ -232,6 +238,7 @@ def mall(request, categoryid, cid, sortid):
     # 定义闪购页面排序功能，排序使用order_by()
     if sortid == '1':
         productList = productList.order_by('productnum')
+
     elif sortid == '2':
         productList = productList.order_by('price')
     elif sortid == '3':
@@ -245,9 +252,12 @@ def mall(request, categoryid, cid, sortid):
         user_Trolley = Trolley.objects.filter(userAccount=user.userAccount)  # 获取用户的trolley，而后返回其productnum作为默认值显示在mall页面
         for item in user_Trolley:
             item_info_Trolley[item.productid] = item.productnum
+    print("排序方式：", sortid)
+
     return render(request, 'axf/mall.html', {"title": "商城", 'leftBar': leftBar, 'productList': productList,
                                              "childList": childList, "categoryid": categoryid, "cid": cid,
-                                             "item_info_Trolley": item_info_Trolley})
+                                             "item_info_Trolley": item_info_Trolley, "sortid": sortid, "order_dict": order_dict,
+                                             "in_mall": in_mall})
 
 
 # 重定向回mall
@@ -257,13 +267,15 @@ def mall_redirect(request):
 
 # 购物车
 def trolley(request):
+    in_trolley = True
     token = request.session.get("userToken")
     if not token:
         return redirect('/login/')
     user = User.objects.get(userToken=token)
     trolleyList = Trolley.objects.filter(userAccount=user.userAccount)
     return render(request, 'axf/trolley.html', {"title": "购物车", "userName": user.userName, "userPhone": user.userPhone,
-                                                "userAddress": user.userAddress, "trolleyList": trolleyList})
+                                                "userAddress": user.userAddress, "trolleyList": trolleyList,
+                                                "in_trolley": in_trolley})
 
 
 # 修改购物车商品
@@ -309,19 +321,11 @@ def changetrolley(request, flag):
             choose = '√'
         return JsonResponse({"status": "success", "data": choose})
     # 全选购物车商品
-    # elif flag == '3':
-    #     chooseall = Trolley.objects.filter(userAccount=user.userAccount).all()
-    #     print(chooseall)
-    #     # for item in chooseall:
-    #
-    #     # chosen_item.isChose = not chosen_item.isChose
-    #     #
-    #     # chosen_item.save()
-    #     # if chosen_item.isChose:
-    #     #     choose = '√'
-    #     # else:
-    #     #     choose = ''
-    #     return JsonResponse({"status": "success", "data": '√'})
+    elif flag == '3':
+        all_goods = Trolley.objects.filter(userAccount=user.userAccount).all()
+        print("所有购物车商品：", all_goods)
+        # 传入购物车所有商品
+        return JsonResponse({"status": "success", "data": all_goods})
 
 
 def additems(user, product_id, stores, detail, user_trolley):

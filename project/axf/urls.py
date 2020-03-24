@@ -6,9 +6,8 @@ from . import views
 
 urlpatterns = [
     re_path(r'^test/$', views.testpage, name='test'),
-    # re_path(r'^/$', views.home, name='home'),
+    re_path(r'^$', views.home, name='home'),
     re_path(r'^home/$', views.home, name='home'),
-    # re_path(r'^mall/(\d+)/(\d+)/(\d+)/$', views.mall, name='mall'),
     re_path(r'^mall/(\d+)/(\d+)/(\d+)/$', views.mall, name='mall'),
     re_path(r'^mall/$', views.mall_redirect, name='mall_redirect'),
     re_path(r'^trolley/$', views.trolley, name='trolley'),

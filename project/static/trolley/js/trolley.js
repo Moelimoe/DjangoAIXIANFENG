@@ -55,23 +55,27 @@ $(document).ready(function(){
                     s.innerHTML = data.data
                 }
             })
-        },false)
+        },false);
     }
 
     // //全选购物篮物品
-    // var choosealls = document.getElementsByClassName("chooseall");
-    // for (var k = 0; k < choosealls.length; k++){
-    //     chooseall = choosealls[k];
-    //     chooseall.addEventListener("click", function(){
-    //         pid = this.getAttribute("csa");
-    //         $.post("/changetrolley/3/", {"productid":pid}, function(data){
-    //             if (data.status == "success"){
-    //                 var cas = document.getElementById(pid+"ca");
-    //                 cas.innerHTML = data.data
-    //             }
-    //         })
-    //     },false)
-    // }
+    // var chooseall = document.getElementById("_chooseall");
+    // chooseall.addEventListener("click", function(){
+    //     $.post("/changetrolley/3/", function(data){
+    //         if (data.status == "success"){
+    //             console.log("全选啊");
+    //             chooseall.innerHTML = "√";
+    //             // for (var k=0; k < data.data.length; k++){
+    //             //     if(data.data[k].isChose!=="True"){
+    //             //         var s = document.getElementById(pid+"a");
+    //             //         s.innerHTML = "√";
+    //             //     }
+    //             //     chooseall.innerHTML = "√";
+    //             // }
+    //         }
+    //     })
+    // },false)
+
 
 
     var ok = document.getElementById("ok");

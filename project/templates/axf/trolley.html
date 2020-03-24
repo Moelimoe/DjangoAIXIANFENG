@@ -77,10 +77,8 @@
                         <div class="confirm">
 <!--                             全选-->
                             <span class="chooseall" csa="{{item.productid}}">
-                                <span id="{{item.productid}}ca">
-                                {% ifequal True item.isChose %}
-                                    √
-                                {% endifequal %}
+                                <span id="_chooseall">
+<!--                                    √-->
                                 </span>
                             </span>
                         </div>
@@ -92,4 +90,15 @@
         </section>
     </section>
 </div>
+
+<!--footer图标变色-->
+{% if in_trolley %}
+    <a href="/trolley/" class="trolley">
+        <dl>
+            <dt><span></span></dt>
+            <dd>购物车</dd>
+        </dl>
+    </a>
+{% endif %}
+
 {% endblock base%}

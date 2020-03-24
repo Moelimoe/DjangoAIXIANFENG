@@ -87,24 +87,27 @@
 <!--            排序 -->
             <div id="sortdiv">
                 <div>
-<!--                    换成反向解析-->
-                    {# <a href="/market/{{categoryid}}/{{cid}}/0/" class="sorta"><span>综合排序</span></a> #}
-                    {# <a href="/market/{{categoryid}}/{{cid}}/1/" class="sorta"><span>销量排序</span></a> #}
-                    {# <a href="/market/{{categoryid}}/{{cid}}/2/" class="sorta"><span>价格最低</span></a> #}
-                    {# <a href="/market/{{categoryid}}/{{cid}}/3/" class="sorta"><span>价格最高</span></a> #}
-                    <a href=" {% url 'axf:mall' categoryid cid 0 %}" class="sorta"><span>综合排序</span></a>
-                    <a href=" {% url 'axf:mall' categoryid cid 1 %}" class="sorta"><span>销量排序</span></a>
-                    <a href=" {% url 'axf:mall' categoryid cid 2 %}" class="sorta"><span>价格最低</span></a>
-                    <a href=" {% url 'axf:mall' categoryid cid 3 %}" class="sorta"><span>价格最高</span></a>
+<!--                    <a href=" {% url 'axf:mall' categoryid cid 0 %}" class="sorta"><span>综合排序</span></a>-->
+<!--                    <a href=" {% url 'axf:mall' categoryid cid 1 %}" class="sorta"><span>销量排序</span></a>-->
+<!--                    <a href=" {% url 'axf:mall' categoryid cid 2 %}" class="sorta"><span>价格最低</span></a>-->
+<!--                    <a href=" {% url 'axf:mall' categoryid cid 3 %}" class="sorta"><span>价格最高</span></a>-->
+                    {% for order in order_dict %}
+                    <a href=" {% url 'axf:mall' categoryid cid order %}" class="sorta"><span>{{order_dict|get_item:order}}</span></a>
+                    {% endfor %}
 
                 </div>
             </div>
         </menu>
-
-
-
     </section>
-
-
 </div>
+
+<!--footer图标变色-->
+{% if in_mall %}
+<a href="/mall/" class="mall">
+    <dl>
+        <dt><span></span></dt>
+        <dd>闪购商城</dd>
+    </dl>
+</a>
+{% endif %}
 {% endblock base%}

@@ -12,22 +12,21 @@
 </head>
 <body>
     <header>
-        <h4><b>123</b></h4>
+        <h4><b>header</b></h4>
     </header>
     <div>
         {% block base %}
         {% endblock base %}
     </div>
     <footer>
+        <!--                span存放图片，实现语句在base.css -->
         <a href="/home/" class="home">
             <dl>
-<!--                span存放图片，实现语句在base.css -->
                 <dt><span></span></dt>
                 <dd>主页</dd>
             </dl>
         </a>
 <!--        数字实现进入商城页面，自动显示热销榜-->
-<!--        <a href="/mall/104749/0/0/" class="mall">-->
 <!--        使用反向解析-->
         <a href="{% url 'axf:mall' 104749 0 0 %} " class="mall">
             <dl>
@@ -41,6 +40,7 @@
                 <dd>购物车</dd>
             </dl>
         </a>
+
         <a href="/profile/" class="profile">
             <dl>
                 <dt><span></span></dt>

@@ -207,3 +207,8 @@ section menu > div > div > a > span {
     margin-top: 0.3rem; }
 
 
+
+footer .mall span {
+    background: url(/static/main/img/mall1.png) no-repeat;
+    background-size: 0.513889rem;
+}
