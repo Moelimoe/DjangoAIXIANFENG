@@ -24,8 +24,9 @@ $(document).ready(function(){
                 if (data.status == "success"){
                     //添加成功，把中间的span的innerHTML变成当前的数量
                     document.getElementById(pid).innerHTML = data.data;
-                    //购物车需要一个总价
-                    document.getElementById(pid+"price").innerHTML = data.totalPrice;
+                    //购物车单个商品总价
+                    document.getElementById(pid+"price").innerHTML = data.price;
+                    document.getElementById("total_price").innerHTML = data.totalPrice;
                 }
             })
         })
@@ -40,8 +41,9 @@ $(document).ready(function(){
                 if (data.status == "success"){
                     //添加成功，把中间的span的innerHTML变成当前的数量
                     document.getElementById(pid).innerHTML = data.data;
-                    //购物车需要一个总价
-                    document.getElementById(pid+"price").innerHTML = data.totalPrice;
+                    //购物车单个商品总价
+                    document.getElementById(pid+"price").innerHTML = data.price;
+                    document.getElementById("total_price").innerHTML = data.totalPrice;
                     if(data.data == 0) {
                         //window.location.href = "http://127.0.0.1:8000/trolley/"
                         var li = document.getElementById(pid+"li");
@@ -64,7 +66,9 @@ $(document).ready(function(){
                 if (data.status == "success"){
                     //window.location.href = "http://127.0.0.1:8000/trolley/"
                     var s = document.getElementById(pid+"a");
-                    s.innerHTML = data.data
+                    console.log("勾选购物篮？")
+                    s.innerHTML = data.data;
+                    document.getElementById("total_price").innerHTML = data.totalPrice;
                 }
             })
         },false);
@@ -85,6 +89,7 @@ $(document).ready(function(){
                         pid = chooses[k].getAttribute("goodsid");
                         var s = document.getElementById(pid + "a");
                         s.innerHTML = data.data;
+                        document.getElementById("total_price").innerHTML = data.totalPrice;
                     }
                 }
                 else if (data.status == "failed"){
@@ -93,6 +98,7 @@ $(document).ready(function(){
                         pid = chooses[k].getAttribute("goodsid");
                         var s = document.getElementById(pid + "a");
                         s.innerHTML = data.data;
+                        document.getElementById("total_price").innerHTML = data.totalPrice;
                         }
                     }
             });
