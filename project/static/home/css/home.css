@@ -213,3 +213,7 @@
   margin: auto; }
 
 
+footer .home span {
+  background: url(/static/main/img/home1.png) no-repeat;
+  background-size: 0.513889rem;
+}

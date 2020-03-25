@@ -17,9 +17,11 @@
 /*    top: 0; */
 /*}*/
 
+footer .trolley span {
+    background: url(/static/main/img/trolley1.png) no-repeat;
+    background-size: 0.513889rem;
 
-
-
+}
 
 .full > section {
     background: lightpink; }

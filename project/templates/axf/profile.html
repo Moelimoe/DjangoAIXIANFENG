@@ -11,9 +11,9 @@
 <h4><b>我的</b></h4>
 <div id="profile">
     <section class="fixed">
-        <span href="">
+        <span href="" class="user_profile">
             {% if userProfile %}
-            <img  id="user_profile" src="{{userProfile}}" alt="头像丢失" style="font-size: 18px" height="150" width="150"/>
+            <img  id="user_profile" src="{{userProfile}}" alt="头像丢失"/>
             {% else %}
             <span class="glyphicon glyphicon-user">
             </span>
@@ -25,7 +25,7 @@
         <p class="goods_collect"><span class="glyphicon glyphicon-heart"></span>商品收藏</p>
     </section>
 
-    <section class="profile">
+    <section class="p-profile">
         <div class="check_orders" style="">
             <span id="my_order"><a href="/trolley/">我的订单&gt;</a></span>
             <span id="order_record"><a href="#">&lt;查看全部订单</a></span>
@@ -116,4 +116,14 @@
         <p><a href="/signout/">退出当前账号</a></p>
     </section>
 </div>
+
+<!--footer图标变色-->
+{% if in_profile %}
+<a href="/profile/" class="profile">
+    <dl>
+        <dt><span></span></dt>
+        <dd>我的</dd>
+    </dl>
+</a>
+{% endif %}
 {% endblock base%}
