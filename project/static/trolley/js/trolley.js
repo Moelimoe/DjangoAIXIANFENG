@@ -1,4 +1,16 @@
 $(document).ready(function(){
+
+    //定义一个获取指定元素样式的函数
+    function getStyle(obj , name){
+        if(window.getComputedStyle){
+            //正常浏览器的方式，具有getComputedStyle()方法
+            return getComputedStyle(obj , null)[name];
+        }else{
+            //IE8的方式，没有getComputedStyle()方法
+            return obj.currentStyle[name];
+        }
+
+    }
     //修改购物车
     var addShoppings = document.getElementsByClassName("addShopping");
     var subShoppings = document.getElementsByClassName("subShopping");
@@ -58,23 +70,33 @@ $(document).ready(function(){
         },false);
     }
 
-    // //全选购物篮物品
-    // var chooseall = document.getElementById("_chooseall");
-    // chooseall.addEventListener("click", function(){
-    //     $.post("/changetrolley/3/", function(data){
-    //         if (data.status == "success"){
-    //             console.log("全选啊");
-    //             chooseall.innerHTML = "√";
-    //             // for (var k=0; k < data.data.length; k++){
-    //             //     if(data.data[k].isChose!=="True"){
-    //             //         var s = document.getElementById(pid+"a");
-    //             //         s.innerHTML = "√";
-    //             //     }
-    //             //     chooseall.innerHTML = "√";
-    //             // }
-    //         }
-    //     })
-    // },false)
+
+    //    全选购物车商品，有一个小bug，最初是全选是进入页面全选框会显示白色，但是是小问题不影响实际功能
+    $("#_chooseall").click(function () {
+        BGC = getStyle(document.getElementById("_chooseall"), "backgroundColor");
+            $("html,#_chooseall").animate({backgroundColor: "yellow", color: "black"}, 10);
+            //必须有切片才能调用getAttribute()
+            $.post("/changetrolley/3/", function (data) {
+                console.log(data.status)
+                var chooses = document.getElementsByClassName("ischose");
+                if (data.status == "success"){
+                    $("html,#_chooseall").animate({backgroundColor: "yellow", color: "black"}, 10);
+                    for (var k = 0; k < chooses.length; k++) {
+                        pid = chooses[k].getAttribute("goodsid");
+                        var s = document.getElementById(pid + "a");
+                        s.innerHTML = data.data;
+                    }
+                }
+                else if (data.status == "failed"){
+                    $("html,#_chooseall").animate({backgroundColor: "white", color: "white"}, 10);
+                    for (var k = 0; k < chooses.length; k++) {
+                        pid = chooses[k].getAttribute("goodsid");
+                        var s = document.getElementById(pid + "a");
+                        s.innerHTML = data.data;
+                        }
+                    }
+            });
+        });
 
 
 

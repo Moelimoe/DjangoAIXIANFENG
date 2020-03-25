@@ -141,7 +141,7 @@ footer .trolley span {
     text-align: center;
     float: left; }
 
-.confirm > span {
+.confirm > span, .chooseall {
     box-sizing: border-box;
     border: 0.04rem solid orange;
     background: white;
@@ -246,4 +246,8 @@ footer .trolley span {
     padding: 0 0.7rem; }
 
 
+#_chooseall{
+    color: white;
+    background: white;
+}
 

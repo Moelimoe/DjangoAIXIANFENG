@@ -5,6 +5,7 @@
 <!--用于当css和js需要单独定义时使用-->
 <link rel="stylesheet" type="text/css" href="{% static 'trolley/css/trolley.css'%}" />
 <script type="text/javascript" charset="utf-8" src="{% static 'trolley/js/trolley.js' %}"></script>
+<script type="text/javascript" charset="utf-8" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-color/2.1.2/jquery.color.min.js"></script>
 {% endblock linkscript %}
 
 {% block base%}
@@ -78,11 +79,11 @@
 <!--                             全选-->
                             <span class="chooseall" csa="{{item.productid}}">
                                 <span id="_chooseall">
-<!--                                    √-->
+                                    √
                                 </span>
                             </span>
                         </div>
-                        <p><span>全选</span><span>共计:</span><span id="total_price">总价</span></p>
+                        <p ><span>全选</span><span>共计:</span><span id="total_price">总价</span></p>
                         <a id="ok">选好了</a>
                     </li>
                 </ul>

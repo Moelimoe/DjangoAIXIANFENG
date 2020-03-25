@@ -293,6 +293,32 @@ def changetrolley(request, flag):
     # 匹配用户购物车
     user_trolley = Trolley.objects.filter(userAccount=user.userAccount)
     # 匹配商品信息，如果存在重复id会报错，一般来说不应该有重复的id
+    print("商品id", product_id)
+    # 全选和取消购物车商品？
+    if flag == '3':
+        print("走全选的道路")
+        all_chosen = 0
+        all_goods = Trolley.objects.filter(userAccount=user.userAccount).all()
+        print("所有购物车商品：", all_goods, len(all_goods))
+        # 储存购物车所有商品的isChose信息
+        choices = {index: obj.isChose for obj in all_goods for index in range(len(all_goods))}
+        print("choices：", choices, False in choices.values())
+        if False in choices.values():
+            for obj in all_goods:
+                obj.isChose = True
+                obj.save()
+            all_chosen = 1
+            # 全选中
+            print("全选：", [o.isChose for o in all_goods])
+            return JsonResponse({"status": "success", "data": '√'})
+        else:
+            for obj in all_goods:
+                obj.isChose = False
+                obj.save()
+            all_chosen = 0
+            # 全取消
+            print("全取消：", [o.isChose for o in all_goods])
+            return JsonResponse({"status": "failed", "data": ''})
     detail = Goods.objects.get(productid=product_id)
     # 取当前库存数值
     stores = detail.storenums
@@ -320,12 +346,7 @@ def changetrolley(request, flag):
         if chosen_item.isChose:
             choose = '√'
         return JsonResponse({"status": "success", "data": choose})
-    # 全选购物车商品
-    elif flag == '3':
-        all_goods = Trolley.objects.filter(userAccount=user.userAccount).all()
-        print("所有购物车商品：", all_goods)
-        # 传入购物车所有商品
-        return JsonResponse({"status": "success", "data": all_goods})
+
 
 
 def additems(user, product_id, stores, detail, user_trolley):
@@ -371,6 +392,7 @@ def submitorder(request):
     token = request.session.get("userToken")
     user = User.objects.get(userToken=token)
     user_Trolley = Trolley.objects.filter(userAccount=user.userAccount)
+    # 这里总价有问题，应该只选择勾选的，待修正
     total_price = 0
     item_list_to_order = []
     for item_info in user_Trolley:
