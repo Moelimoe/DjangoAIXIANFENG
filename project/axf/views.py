@@ -245,14 +245,13 @@ def mall(request, categoryid, cid, sortid):
         productList = productList.order_by('-price')
     token = request.session.get("userToken")  # token是userToken
     # （如果已登录）取出用户购物车对应商品的数量，加载到mall页面
-    print("useToken", token)
     item_info_Trolley = {}  # 储存用户购物车的物品
     if token:
         user = User.objects.get(userToken=token)
         user_Trolley = Trolley.objects.filter(userAccount=user.userAccount)  # 获取用户的trolley，而后返回其productnum作为默认值显示在mall页面
         for item in user_Trolley:
             item_info_Trolley[item.productid] = item.productnum
-    print("排序方式：", sortid)
+    # print("排序方式：", sortid)
 
     return render(request, 'axf/mall.html', {"title": "商城", 'leftBar': leftBar, 'productList': productList,
                                              "childList": childList, "categoryid": categoryid, "cid": cid,
@@ -273,9 +272,12 @@ def trolley(request):
         return redirect('/login/')
     user = User.objects.get(userToken=token)
     trolleyList = Trolley.objects.filter(userAccount=user.userAccount)
+    # print(trolleyList, "这是购物车清单")
+    totalPrice = total_cost(user.userAccount)
+    # print("这是总价格：", totalPrice)
     return render(request, 'axf/trolley.html', {"title": "购物车", "userName": user.userName, "userPhone": user.userPhone,
                                                 "userAddress": user.userAddress, "trolleyList": trolleyList,
-                                                "in_trolley": in_trolley})
+                                                "in_trolley": in_trolley, "totalPrice": totalPrice})
 
 
 # 修改购物车商品
@@ -292,51 +294,50 @@ def changetrolley(request, flag):
     user = User.objects.get(userToken=token)
     # 匹配用户购物车
     user_trolley = Trolley.objects.filter(userAccount=user.userAccount)
-    # 匹配商品信息，如果存在重复id会报错，一般来说不应该有重复的id
-    print("商品id", product_id)
-    # 全选和取消购物车商品？
+    # 全选和取消购物车商品
     if flag == '3':
-        print("走全选的道路")
         all_chosen = 0
         all_goods = Trolley.objects.filter(userAccount=user.userAccount).all()
-        print("所有购物车商品：", all_goods, len(all_goods))
         # 储存购物车所有商品的isChose信息
         choices = {index: obj.isChose for obj in all_goods for index in range(len(all_goods))}
-        print("choices：", choices, False in choices.values())
+        # print("choices：", choices, False in choices.values())
         if False in choices.values():
             for obj in all_goods:
                 obj.isChose = True
                 obj.save()
             all_chosen = 1
             # 全选中
-            print("全选：", [o.isChose for o in all_goods])
-            return JsonResponse({"status": "success", "data": '√'})
+            # print("全选：", [o.isChose for o in all_goods])
+            totalPrice = total_cost(user.userAccount)
+            return JsonResponse({"status": "success", "data": '√', "totalPrice": totalPrice})
         else:
             for obj in all_goods:
                 obj.isChose = False
                 obj.save()
             all_chosen = 0
             # 全取消
-            print("全取消：", [o.isChose for o in all_goods])
-            return JsonResponse({"status": "failed", "data": ''})
+            # print("全取消：", [o.isChose for o in all_goods])
+            return JsonResponse({"status": "failed", "data": '', "totalPrice": 0})
     detail = Goods.objects.get(productid=product_id)
     # 取当前库存数值
     stores = detail.storenums
     # 添加商品0/
     if flag == '0':
         add = additems(user, product_id, stores, detail, user_trolley)
-        return JsonResponse({"data": add.productnum, "totalPrice": add.productprice, "status": "success"})
+        totalPrice = total_cost(user.userAccount)
+        return JsonResponse({"data": add.productnum, "price": add.productprice, "status": "success", "totalPrice": totalPrice})
     # 减少商品1/
     elif flag == '1':
         try:
             sub = subitems(product_id, user_trolley, detail)
-            return JsonResponse({"data": sub.productnum, "totalPrice": sub.productprice, "status": "success"})
+            totalPrice = total_cost(user.userAccount)
+            return JsonResponse({"data": sub.productnum, "price": sub.productprice, "status": "success", "totalPrice": totalPrice})
         except Trolley.DoesNotExist as e:
-            print("购物车是空")
-            return JsonResponse({"data": 0, "status": "error"})
+            # print("购物车是空")
+            return JsonResponse({"data": 0, "status": "error", "totalPrice": 0})
         except AttributeError as a:
-            print("购物车物品数量为0")
-            return JsonResponse({"data": 0, "status": "error"})
+            # print("购物车物品数量为0")
+            return JsonResponse({"data": 0, "status": "error", "totalPrice": 0})
     # 单选购物车商品
     elif flag == '2':
         chosen_item = Trolley.objects.filter(userAccount=user.userAccount).get(productid=product_id)
@@ -345,22 +346,23 @@ def changetrolley(request, flag):
         choose = ''
         if chosen_item.isChose:
             choose = '√'
-        return JsonResponse({"status": "success", "data": choose})
+        totalPrice = total_cost(user.userAccount)
+        return JsonResponse({"status": "success", "data": choose, "totalPrice": totalPrice})
 
 
-
+# 添加商品
 def additems(user, product_id, stores, detail, user_trolley):
     try:
         # 尝试拉取用户购物车数据
         find = user_trolley.get(productid=product_id)
         # 判断库存数量是否大于购物车对应商品数量
         if stores - find.productnum > 0:
-            print("库存大于加入数量", find.productprice)
+            # print("库存大于加入数量", find.productprice)
             find.productnum += 1
             find.productprice += round(detail.price * 1, 2)  # 数量加一之后总价等于当前购物车价格加上添加的数量*单价
             find.save()
         else:
-            print("库存比数量还少了")
+            # print("库存比数量还少了")
             pass
     except Trolley.DoesNotExist as e:
         # 购物车找不到对应商品
@@ -392,13 +394,10 @@ def submitorder(request):
     token = request.session.get("userToken")
     user = User.objects.get(userToken=token)
     user_Trolley = Trolley.objects.filter(userAccount=user.userAccount)
-    # 这里总价有问题，应该只选择勾选的，待修正
-    total_price = 0
+    total = total_cost(user.userAccount)
     item_list_to_order = []
     for item_info in user_Trolley:
         if item_info.isChose:
-            # 总价
-            total_price += item_info.productnum * item_info.productprice
             # print(生成用户订单)
             orderid = ''.join(random.sample(string.ascii_letters + string.digits, 8)) \
                       + time.strftime("%Y%m%d%H%M", time.localtime())
@@ -409,9 +408,21 @@ def submitorder(request):
             item_info.save()
     # 将所有订单全部加入订单记录
     Order.objects.bulk_create(item_list_to_order)
-    print("总价：", total_price)
-    return JsonResponse({"status": "success", "data": total_price})
+    print("总价：", total)
+    return JsonResponse({"status": "success", "data": total})
 
 
-
+# 总价
+def total_cost(userAccount):
+    user_Trolley = Trolley.objects.filter(userAccount=userAccount)
+    # print("这是实际计算时用户购物车：", user_Trolley)
+    total = 0
+    if not user_Trolley:
+        return total
+    for item_info in user_Trolley:
+        if item_info.isChose:
+            # 总价
+            total += item_info.productprice
+            item_info.save()
+    return total
 
