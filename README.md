@@ -1,6 +1,6 @@
 #   DjangoAIXIANFENG
 
-1、这是一个使用django开发的B2C模式的移动端购物商城app，后端内容主要核心内容
+1、这是一个使用django开发的B2B模式的移动端购物商城app，后端内容主要核心内容
 
 2、主要代码内容在/project/axf/views.py、models.py和project/axf/templates下前端中json和css部分有少部分自己完成，html大部分独立完成  
 
