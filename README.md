@@ -4,7 +4,7 @@
 
 2、主要代码内容在/project/axf/views.py、models.py和project/axf/templates下前端中json和css部分有少部分自己完成，html大部分独立完成  
 
-3、主要使用的模块到django中HttpResponse, JsonResponse，渲染、重定向，已经django中登录、注册表单等；其余模块有pillow的构件图像和字体生成验证码、os、random、io、time、string等  
+3、主要使用的模块右django中HttpResponse, JsonResponse，渲染、重定向，以及django中登录、注册表单等；其余模块有pillow的构件图像和字体生成验证码、os、random、io、time、string等  
 
 4、主要实现用户注册、登录、验证码，购物车商品添加、减少，订单提交，商城、主页商品展示，类型筛选等功能  
 
